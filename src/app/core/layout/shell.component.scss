@@ -1,0 +1,85 @@
+.shell-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+  height: auto;
+  min-height: 60px;
+  padding: 0.5rem 1.25rem;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+}
+.brand-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.brand-tenant {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-left: 1px solid var(--rail);
+  padding-left: 0.5rem;
+}
+.shell-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.shell-nav a {
+  font-family: var(--font-body);
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 0.4rem 0.1rem;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.shell-nav a:hover {
+  color: var(--ink);
+}
+.shell-nav a.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.spacer {
+  flex: 1 0 auto;
+}
+.branch-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--rail);
+  border-radius: 999px;
+}
+.branch-tag mat-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+.branch-tag:hover {
+  border-color: var(--rail-strong);
+  color: var(--ink);
+}
+.shell-content {
+  padding: 1rem 1.25rem;
+}
+@media (min-width: 768px) {
+  .shell-content {
+    padding: 1.75rem 2rem;
+  }
+}

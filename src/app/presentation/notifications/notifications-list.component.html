@@ -1,0 +1,47 @@
+<span class="eyebrow">Notification Center</span>
+<h2>Notificaciones</h2>
+
+<div class="page-tabs">
+  <button class="tab" [class.is-active]="filter() === 'All'" (click)="setFilter('All')">
+    Todas <span class="count">{{ result().totalCount }}</span>
+  </button>
+  <button class="tab" [class.is-active]="filter() === 'Unread'" (click)="setFilter('Unread')">
+    No leídas <span class="count">{{ result().unreadCount }}</span>
+  </button>
+  <button class="tab" [class.is-active]="filter() === 'Archived'" (click)="setFilter('Archived')">
+    Archivadas <span class="count">{{ result().archivedCount }}</span>
+  </button>
+
+  @if (result().unreadCount > 0) {
+    <button mat-stroked-button class="mark-all" (click)="markAllAsRead()">Marcar todas como leídas</button>
+  }
+</div>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else if (result().items.length === 0) {
+  <p>No hay notificaciones aquí.</p>
+} @else {
+  <div class="notification-page-list">
+    @for (item of result().items; track item.id) {
+      <div class="notification-page-item" [class.is-unread]="!item.isRead" (click)="open(item)">
+        <span class="unread-dot"></span>
+        <div class="notification-body">
+          <p class="notification-title">
+            @if (item.actorName) {
+              <strong>{{ item.actorName }}</strong>
+            }
+            {{ item.title }}
+          </p>
+          <p class="notification-message">{{ item.message }}</p>
+          <span class="notification-time">{{ timeAgo(item.createdAt) }}</span>
+        </div>
+        @if (filter() !== 'Archived') {
+          <button mat-icon-button [disabled]="busyId() === item.id" (click)="archive(item, $event)" aria-label="Archivar">
+            <mat-icon>archive</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

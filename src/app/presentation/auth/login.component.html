@@ -1,0 +1,57 @@
+<div class="auth-shell">
+  <aside class="auth-brand">
+    <span class="brand-mark">FLUY</span>
+    <p class="brand-line">Cada solicitud viaja por su propia vía de control.</p>
+
+    <ol class="route-line" aria-hidden="true">
+      <li class="route-step is-done">
+        <span class="route-dot"></span>
+        <div class="route-label"><span class="route-title">Solicitud</span></div>
+      </li>
+      <li class="route-step is-current">
+        <span class="route-dot"></span>
+        <div class="route-label"><span class="route-title">Revisión</span></div>
+      </li>
+      <li class="route-step">
+        <span class="route-dot"></span>
+        <div class="route-label"><span class="route-title">Completada</span></div>
+      </li>
+    </ol>
+  </aside>
+
+  <section class="auth-panel">
+    <div class="auth-form-wrap">
+      <span class="eyebrow">Acceso de tenant</span>
+      <h1>Iniciar sesión</h1>
+
+      <form (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Subdominio</mat-label>
+          <input matInput name="subdomain" type="text" [(ngModel)]="subdomain" placeholder="acme" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput name="email" type="email" [(ngModel)]="email" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input matInput name="password" type="password" [(ngModel)]="password" required />
+        </mat-form-field>
+
+        @if (errorMessage(); as error) {
+          <p class="error">{{ error }}</p>
+        }
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="loading()" class="submit-button">
+          @if (loading()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Ingresar
+          }
+        </button>
+      </form>
+    </div>
+  </section>
+</div>

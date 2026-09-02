@@ -1,0 +1,65 @@
+.intro {
+  max-width: 720px;
+  color: var(--ink-soft);
+}
+.list-card,
+.form-card,
+.editor-card {
+  max-width: 720px;
+  margin-bottom: 1rem;
+}
+.form-card mat-form-field,
+.editor-card mat-form-field {
+  margin-right: 0.5rem;
+}
+.definition-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--rail);
+}
+.definition-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.description {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+.definition-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.step-route {
+  margin-bottom: 1rem;
+}
+.transition-list {
+  padding-left: 1.2rem;
+}
+.condition-note {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+.add-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.add-form mat-form-field {
+  flex: 1 1 160px;
+}
+.empty-note {
+  color: var(--ink-faint);
+}
+.error {
+  color: var(--signal-stop);
+  font-size: 0.85rem;
+}

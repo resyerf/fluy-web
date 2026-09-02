@@ -1,0 +1,17 @@
+.approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 560px;
+}
+mat-form-field {
+  width: 100%;
+}
+.error {
+  color: var(--signal-stop);
+  font-size: 0.85rem;
+}
+.tier-note {
+  padding-top: 0;
+  padding-bottom: 0.5rem;
+}

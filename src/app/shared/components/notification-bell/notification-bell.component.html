@@ -1,0 +1,85 @@
+<button
+  mat-icon-button
+  class="bell-trigger"
+  [matMenuTriggerFor]="panel"
+  aria-label="Notificaciones"
+  [matBadge]="result().unreadCount > 0 ? result().unreadCount : null"
+  matBadgeColor="warn"
+  matBadgeSize="small"
+>
+  <mat-icon>notifications</mat-icon>
+</button>
+
+<mat-menu #panel="matMenu" class="notification-panel" xPosition="before">
+  <div class="notification-header" (click)="$event.stopPropagation()">
+    <h3>Notificaciones</h3>
+    @if (result().unreadCount > 0) {
+      <button class="link-action" (click)="markAllAsRead($event)">Marcar todas como leídas</button>
+    }
+  </div>
+
+  <div class="notification-tabs" (click)="$event.stopPropagation()">
+    <button
+      class="tab"
+      [class.is-active]="filter() === 'All'"
+      (click)="setFilter('All', $event)"
+    >
+      Todas <span class="count">{{ result().totalCount }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.is-active]="filter() === 'Unread'"
+      (click)="setFilter('Unread', $event)"
+    >
+      No leídas <span class="count">{{ result().unreadCount }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.is-active]="filter() === 'Archived'"
+      (click)="setFilter('Archived', $event)"
+    >
+      Archivadas <span class="count">{{ result().archivedCount }}</span>
+    </button>
+  </div>
+
+  <div class="notification-list" (click)="$event.stopPropagation()">
+    @if (loading()) {
+      <div class="notification-empty">
+        <mat-spinner diameter="24" />
+      </div>
+    } @else if (result().items.length === 0) {
+      <p class="notification-empty">No hay notificaciones aquí.</p>
+    } @else {
+      @for (item of result().items; track item.id) {
+        <div class="notification-item" [class.is-unread]="!item.isRead" (click)="open(item)">
+          <span class="unread-dot"></span>
+          <div class="notification-body">
+            <p class="notification-title">
+              @if (item.actorName) {
+                <strong>{{ item.actorName }}</strong>
+              }
+              {{ item.title }}
+            </p>
+            <p class="notification-message">{{ item.message }}</p>
+            <span class="notification-time">{{ timeAgo(item.createdAt) }}</span>
+          </div>
+          @if (filter() !== 'Archived') {
+            <button
+              class="archive-action"
+              type="button"
+              [disabled]="busyId() === item.id"
+              (click)="archive(item, $event)"
+              aria-label="Archivar"
+            >
+              <mat-icon inline="true">archive</mat-icon>
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <div class="notification-footer" (click)="$event.stopPropagation()">
+    <a routerLink="/notifications">Ver todas las notificaciones</a>
+  </div>
+</mat-menu>

@@ -1,0 +1,69 @@
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else {
+  @if (request(); as request) {
+    <div class="title-row">
+      <h2>{{ request.title }}</h2>
+      <span class="signal" [class]="signalByStatus[request.status]">{{ request.status }}</span>
+    </div>
+
+    @if (routeSteps(request); as steps) {
+      @if (steps.length > 0) {
+        <ol class="route-line detail-route">
+          @for (step of steps; track step.title) {
+            <li class="route-step" [class.is-done]="step.state === 'done'" [class.is-current]="step.state === 'current'" [class.is-stop]="step.state === 'stop'">
+              <span class="route-dot"></span>
+              <div class="route-label">
+                <span class="route-title">{{ step.title }}</span>
+                @if (step.meta) {
+                  <span class="route-meta">{{ step.meta }}</span>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    }
+
+    <dl>
+      <dt>Descripción</dt>
+      <dd>{{ request.description || '—' }}</dd>
+      <dt>Monto</dt>
+      <dd class="mono">{{ request.amount ?? '—' }}</dd>
+      <dt>Enviada</dt>
+      <dd class="mono">{{ request.submittedAt ?? 'Todavía no' }}</dd>
+    </dl>
+
+    @if (request.fields.length > 0) {
+      <h3>Campos adicionales</h3>
+      <ul>
+        @for (field of request.fields; track field.key) {
+          <li><strong>{{ field.key }}</strong>: {{ field.value }}</li>
+        }
+      </ul>
+    }
+
+    @if (request.latestApproval; as approval) {
+      @if (approval.comment) {
+        <div class="approval-note">
+          <span class="eyebrow">Comentario del revisor</span>
+          <p>{{ approval.comment }}</p>
+        </div>
+      }
+    }
+
+    @if (canSubmit(request.status)) {
+      <button mat-flat-button color="primary" (click)="submitRequest()" [disabled]="submitting()">
+        {{ submitting() ? 'Enviando...' : request.status === 'ReturnedForCorrection' ? 'Reenviar solicitud' : 'Enviar solicitud' }}
+      </button>
+    }
+
+    @if (errorMessage(); as error) {
+      <p class="error">{{ error }}</p>
+    }
+
+    <p><a mat-button routerLink="/requests">← Volver al listado</a></p>
+  } @else {
+    <p>No se encontró la solicitud.</p>
+  }
+}

@@ -1,0 +1,23 @@
+@if (auth.currentUser(); as user) {
+  <button class="avatar-trigger" [matMenuTriggerFor]="menu" [attr.aria-label]="user.fullName">
+    <span class="avatar">{{ initials(user.fullName) }}</span>
+  </button>
+
+  <mat-menu #menu="matMenu" xPosition="before">
+    <div class="user-menu-header">
+      <p class="user-menu-name">{{ user.fullName }}</p>
+      <p class="user-menu-email">{{ user.email }}</p>
+      @if (tenant.tenant(); as subdomain) {
+        <span class="user-menu-tenant">{{ subdomain }}</span>
+      }
+    </div>
+    <button mat-menu-item routerLink="/profile">
+      <mat-icon>person</mat-icon>
+      <span>Mi perfil</span>
+    </button>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar sesión</span>
+    </button>
+  </mat-menu>
+}

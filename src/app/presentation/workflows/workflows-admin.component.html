@@ -1,0 +1,193 @@
+<h2>Workflows</h2>
+<p class="intro">
+  Motor de Workflow genérico
+</p>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else {
+  @if (!editingVersionId()) {
+    <mat-card class="list-card">
+      <mat-card-header>
+        <mat-card-title>Workflows del tenant</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (definitions().length === 0) {
+          <p class="empty-note">Todavía no hay ningún workflow — las solicitudes se completan con una sola aprobación.</p>
+        } @else {
+          @for (definition of definitions(); track definition.id) {
+            <div class="definition-row">
+              <div class="definition-info">
+                <strong>{{ definition.name }}</strong>
+                <span class="signal" [class]="signalByDefinitionStatus[definition.status]">{{ definition.status }}</span>
+                <span class="description">{{ definition.description }}</span>
+              </div>
+              <div class="definition-actions">
+                @for (version of definition.versions; track version.id) {
+                  @if (version.status === 'Draft') {
+                    <button mat-stroked-button (click)="openEditor(version.id)">Editar v{{ version.versionNumber }} (Draft)</button>
+                  }
+                }
+                @if (definition.status === 'Published') {
+                  <button mat-stroked-button color="warn" (click)="archive(definition.id)">Archivar</button>
+                }
+              </div>
+            </div>
+          }
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>Nuevo workflow</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput name="newName" [(ngModel)]="newName" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Descripción</mat-label>
+          <input matInput name="newDescription" [(ngModel)]="newDescription" />
+        </mat-form-field>
+        @if (errorMessage(); as error) {
+          <p class="error">{{ error }}</p>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="primary" [disabled]="!newName" (click)="createDefinition()">Crear workflow</button>
+      </mat-card-actions>
+    </mat-card>
+  } @else if (editingVersion()) {
+    @if (editingVersion(); as version) {
+    <mat-card class="editor-card">
+      <mat-card-header>
+        <mat-card-title>Editando versión {{ version.versionNumber }} (Draft)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <h3>Pasos</h3>
+        @if (version.steps.length === 0) {
+          <p class="empty-note">Sin pasos todavía.</p>
+        } @else {
+          <ol class="route-line step-route">
+            @for (step of version.steps; track step.id) {
+              <li class="route-step" [class.is-current]="step.id === version.initialStepId">
+                <span class="route-dot"></span>
+                <div class="route-label">
+                  <span class="route-title">{{ step.name }}</span>
+                  <span class="route-meta">{{ step.approverRoleName }}{{ step.id === version.initialStepId ? ' · inicial' : '' }}</span>
+                </div>
+              </li>
+            }
+          </ol>
+
+          @if (version.steps.length > 1) {
+            <mat-form-field appearance="outline">
+              <mat-label>Paso inicial</mat-label>
+              <mat-select [ngModel]="version.initialStepId" name="initialStepId" (ngModelChange)="setInitialStep($event)">
+                @for (step of version.steps; track step.id) {
+                  <mat-option [value]="step.id">{{ step.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+        }
+
+        <div class="add-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del paso</mat-label>
+            <input matInput name="stepName" [(ngModel)]="stepName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Rol aprobador</mat-label>
+            <mat-select name="stepRoleId" [(ngModel)]="stepRoleId">
+              @for (role of roles(); track role.id) {
+                <mat-option [value]="role.id">{{ role.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-stroked-button [disabled]="!stepName || !stepRoleId" (click)="addStep()">Agregar paso</button>
+        </div>
+
+        <h3>Transiciones</h3>
+        @if (version.transitions.length === 0) {
+          <p class="empty-note">Sin transiciones todavía.</p>
+        } @else {
+          <ul class="transition-list">
+            @for (transition of version.transitions; track transition.id) {
+              <li>
+                {{ stepName_(transition.fromStepId) }} →
+                {{ transition.toStepId ? stepName_(transition.toStepId) : 'Completar solicitud' }}
+                @if (transition.conditionField) {
+                  <span class="condition-note">
+                    (si {{ transition.conditionField }} {{ operatorLabel(transition.conditionOperator) }} {{ transition.conditionValue }})
+                  </span>
+                } @else {
+                  <span class="condition-note">(por defecto)</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="add-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Desde el paso</mat-label>
+            <mat-select name="fromStepId" [(ngModel)]="fromStepId">
+              @for (step of version.steps; track step.id) {
+                <mat-option [value]="step.id">{{ step.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Hacia</mat-label>
+            <mat-select name="toStepId" [(ngModel)]="toStepId">
+              <mat-option [value]="null">Completar solicitud</mat-option>
+              @for (step of version.steps; track step.id) {
+                <mat-option [value]="step.id">{{ step.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Condición</mat-label>
+            <mat-select name="conditionField" [(ngModel)]="conditionField">
+              <mat-option [value]="null">Sin condición (por defecto)</mat-option>
+              <mat-option value="Amount">Monto</mat-option>
+            </mat-select>
+          </mat-form-field>
+          @if (conditionField) {
+            <mat-form-field appearance="outline">
+              <mat-label>Operador</mat-label>
+              <mat-select name="conditionOperator" [(ngModel)]="conditionOperator">
+                @for (op of operators; track op.value) {
+                  <mat-option [value]="op.value">{{ op.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Valor</mat-label>
+              <input matInput type="number" name="conditionValue" [(ngModel)]="conditionValue" />
+            </mat-form-field>
+          }
+          <button
+            mat-stroked-button
+            [disabled]="!fromStepId || (conditionField && (!conditionOperator || conditionValue === null))"
+            (click)="addTransition()"
+          >
+            Agregar transición
+          </button>
+        </div>
+
+        @if (errorMessage(); as error) {
+          <p class="error">{{ error }}</p>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="primary" (click)="publish()">Publicar</button>
+        <button mat-button (click)="closeEditor()">Volver a la lista</button>
+      </mat-card-actions>
+    </mat-card>
+    }
+  }
+}

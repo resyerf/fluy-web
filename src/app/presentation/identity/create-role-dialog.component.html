@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Nuevo rol</h2>
+
+<div mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline">
+    <mat-label>Nombre</mat-label>
+    <input matInput name="name" [(ngModel)]="name" />
+  </mat-form-field>
+
+  <p class="permissions-label">Permisos</p>
+  <div class="permissions-grid">
+    @for (permission of data.permissions; track permission.id) {
+      <mat-checkbox [(ngModel)]="selectedPermissions[permission.code]" [name]="permission.code">
+        {{ permission.code }}
+      </mat-checkbox>
+    }
+  </div>
+
+  @if (errorMessage(); as error) {
+    <p class="error">{{ error }}</p>
+  }
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button [disabled]="saving()" (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="saving()" (click)="submit()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Crear rol
+    }
+  </button>
+</div>

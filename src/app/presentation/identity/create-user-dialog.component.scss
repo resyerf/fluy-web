@@ -1,0 +1,13 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 360px;
+}
+.dialog-content mat-form-field {
+  width: 100%;
+}
+.error {
+  color: var(--signal-stop);
+  font-size: 0.85rem;
+}

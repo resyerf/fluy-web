@@ -1,0 +1,49 @@
+<h2>Aprobaciones pendientes</h2>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else if (items().length === 0) {
+  <p>No hay solicitudes esperando tu revisión.</p>
+} @else {
+  <div class="approval-list">
+    @for (item of items(); track item.approvalId) {
+      <mat-card class="approval-card">
+        <mat-card-header>
+          <mat-card-title>
+            <a [routerLink]="['/requests', item.requestId]">{{ item.requestTitle }}</a>
+          </mat-card-title>
+          <mat-card-subtitle>{{ item.requesterEmail }} · {{ item.amount ?? '—' }}</mat-card-subtitle>
+        </mat-card-header>
+
+        @if (item.tier > 1) {
+          <mat-card-content class="tier-note">
+            <span class="signal is-amber">Paso {{ item.tier }} · {{ item.requiredRoleName }}</span>
+          </mat-card-content>
+        }
+
+        <mat-card-content>
+          <mat-form-field appearance="outline">
+            <mat-label>Comentario (obligatorio para rechazar o pedir corrección)</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="comments[item.approvalId]"></textarea>
+          </mat-form-field>
+
+          @if (errorMessages[item.approvalId]; as error) {
+            <p class="error">{{ error }}</p>
+          }
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" [disabled]="busyId() === item.approvalId" (click)="approve(item)">
+            Aprobar
+          </button>
+          <button mat-stroked-button color="warn" [disabled]="busyId() === item.approvalId" (click)="reject(item)">
+            Rechazar
+          </button>
+          <button mat-stroked-button [disabled]="busyId() === item.approvalId" (click)="requestCorrection(item)">
+            Pedir corrección
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}

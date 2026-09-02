@@ -1,0 +1,114 @@
+<h2>Usuarios y roles</h2>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else {
+  <mat-tab-group>
+    <mat-tab label="Usuarios">
+      <div class="tab-body">
+        <div class="tab-toolbar">
+          <button mat-flat-button color="primary" (click)="openCreateUserDialog()">
+            <mat-icon>add</mat-icon>
+            Nuevo usuario
+          </button>
+        </div>
+        @if (lastCreatedUserEmailSent() !== null) {
+          @if (lastCreatedUserEmailSent()) {
+            <p class="token-note">Usuario creado. Se envió un email de activación.</p>
+          } @else {
+            <p class="warning-note">Usuario creado, pero no se pudo enviar el email de activación — avisale por otro medio.</p>
+          }
+        }
+
+        <div class="list">
+          @for (user of users(); track user.id) {
+            <mat-card class="entity-card">
+              <mat-card-header>
+                <mat-card-title>{{ user.fullName }}</mat-card-title>
+                <mat-card-subtitle>
+                  {{ user.email }}
+                  <span class="signal" [class]="signalByUserStatus[user.status]">{{ user.status }}</span>
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="chips">
+                  @for (role of user.roles; track role.userRoleId) {
+                    <span class="chip">
+                      {{ role.roleName }}{{ role.branchId ? ' · ' + branchName(role.branchId) : '' }}
+                    </span>
+                  }
+                  @if (user.roles.length === 0) {
+                    <span class="chip chip-empty">Sin roles asignados</span>
+                  }
+                </div>
+
+                <div class="assign-row">
+                  <mat-form-field appearance="outline" class="role-select">
+                    <mat-label>Asignar rol</mat-label>
+                    <mat-select [(ngModel)]="selectedRoleByUser[user.id]">
+                      @for (role of roles(); track role.id) {
+                        <mat-option [value]="role.id">{{ role.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="branch-select">
+                    <mat-label>Sede (opcional)</mat-label>
+                    <mat-select [(ngModel)]="selectedBranchByUser[user.id]">
+                      <mat-option [value]="null">Todo el tenant</mat-option>
+                      @for (branch of branches(); track branch.id) {
+                        <mat-option [value]="branch.id">{{ branch.name }} ({{ branch.companyName }})</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button
+                    mat-stroked-button
+                    [disabled]="!selectedRoleByUser[user.id] || assigningUserId() === user.id"
+                    (click)="assignRole(user)"
+                  >
+                    Asignar
+                  </button>
+                </div>
+                @if (assignError[user.id]; as error) {
+                  <p class="error">{{ error }}</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Roles">
+      <div class="tab-body">
+        <div class="tab-toolbar">
+          <button mat-flat-button color="primary" (click)="openCreateRoleDialog()">
+            <mat-icon>add</mat-icon>
+            Nuevo rol
+          </button>
+        </div>
+
+        <div class="list">
+          @for (role of roles(); track role.id) {
+            <mat-card class="entity-card">
+              <mat-card-header>
+                <mat-card-title>
+                  {{ role.name }}
+                  @if (role.isSystemRole) {
+                    <span class="chip chip-system">Sistema</span>
+                  }
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="chips">
+                  @for (code of role.permissionCodes; track code) {
+                    <span class="chip">{{ code }}</span>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+}

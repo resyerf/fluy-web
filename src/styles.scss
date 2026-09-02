@@ -1,0 +1,630 @@
+/* ==========================================================================
+   FLUY — sistema de diseño (workspace de tenant)
+   Concepto: una solicitud viaja por puntos de control (WorkflowTransition).
+   El estado se lee como una señal de vía, no como una etiqueta de color
+   plana — de ahí .signal y .route-line, usados en toda la app.
+
+   Paleta minimalista (revisión): neutros grises fríos (antes tenían un sesgo
+   cálido/verdoso en --paper que se leía "SaaS genérico"), un único acento de
+   marca (--accent, un verde pino apagado — "aprobado / avanza", coherente
+   con el producto) reservado exclusivamente para lo interactivo (botón
+   primario, checkbox, indicador activo), y dos señales de negocio contenidas
+   (amber/stop) que ya no son chips rellenos: son un punto de color + texto
+   neutro, para que el color cargue significado puntual, no ruido de fondo
+   en cada tabla. --signal-go reutiliza --accent a propósito — "aprobado" y
+   "acción principal de marca" son la misma idea, no dos verdes distintos.
+   ========================================================================== */
+
+:root {
+  --ink: #14171b;
+  --ink-soft: #565b64;
+  --ink-faint: #8b909a;
+  --paper: #f6f6f4;
+  --surface: #ffffff;
+  --rail: #e2e4e2;
+  --rail-strong: #c4c7c5;
+
+  --accent: #2f5d50;
+  --signal-amber: #a66e1f;
+  --signal-go: var(--accent);
+  --signal-stop: #a6392b;
+
+  --font-display: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-body: 'Public Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+p {
+  line-height: 1.55;
+}
+
+code {
+  font-family: var(--font-mono);
+}
+
+/* Sin esto, un <a> sin estilo cae al azul/violeta de fábrica del navegador —
+   la única fuga de color fuera del sistema de tokens. --accent porque un
+   link de contenido (título de una fila, "Crear una") es, en los hechos,
+   la acción principal de esa fila. */
+a {
+  color: var(--accent);
+}
+a:visited {
+  color: var(--accent);
+}
+
+.main-content {
+  max-width: 1040px;
+}
+
+/* ---- eyebrow / manifest label: used above a page title to name the record type ---- */
+.eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.35rem;
+}
+
+/* ==========================================================================
+   Signal — un punto encendido + una etiqueta en mono, mayúsculas. Antes era
+   un chip relleno (fondo + borde por estado); ahora el color vive solo en
+   el punto y el texto queda neutro — menos superficie de color por fila,
+   más fácil de escanear una tabla larga, y el significado sigue siendo
+   inequívoco porque el punto nunca aparece sin su etiqueta. Se usa para
+   Request.Status, Approval, Tenant.Status, Subscription.Status,
+   WorkflowDefinition.Status: todos los "estados de señal" del sistema
+   comparten el mismo lenguaje visual.
+   ========================================================================== */
+.signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+.signal::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  border-radius: 50%;
+  background: var(--rail-strong);
+}
+
+.signal.is-amber::before {
+  background: var(--signal-amber);
+}
+
+.signal.is-go::before {
+  background: var(--signal-go);
+}
+
+.signal.is-stop::before {
+  background: var(--signal-stop);
+}
+
+/* ==========================================================================
+   Routing line — la firma visual de FLUY: los pasos de un workflow o el
+   avance de una aprobación, como estaciones sobre una vía. Cada punto se
+   enciende con el mismo vocabulario de .signal.
+   ========================================================================== */
+.route-line {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.route-step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  padding: 0.35rem 0;
+}
+
+.route-step:not(:last-child)::after {
+  content: '';
+  width: 2.25rem;
+  height: 2px;
+  background: var(--rail);
+  margin: 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.route-step.is-done:not(:last-child)::after {
+  background: var(--signal-go);
+}
+
+.route-dot {
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--rail-strong);
+  flex-shrink: 0;
+}
+
+.route-step.is-done .route-dot {
+  background: var(--signal-go);
+  border-color: var(--signal-go);
+}
+
+.route-step.is-current .route-dot {
+  background: var(--signal-amber);
+  border-color: var(--signal-amber);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal-amber) 22%, var(--surface));
+}
+
+.route-step.is-stop .route-dot {
+  background: var(--signal-stop);
+  border-color: var(--signal-stop);
+}
+
+.route-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.route-label .route-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.route-label .route-meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Material — reskin directo sobre las clases que Angular Material ya emite
+   (más robusto que pelear con la API de theming de Sass en un M3 en
+   movimiento). styles.scss carga después del prebuilt theme, así que gana
+   por orden de cascada sin necesitar ::ng-deep. --accent queda reservado
+   para lo interactivo (relleno primario, checkbox, indicador activo,
+   progreso) — --ink es texto y cromado estructural, nunca una acción.
+   ========================================================================== */
+.mat-toolbar {
+  font-family: var(--font-display) !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-bottom: 1px solid var(--rail);
+}
+
+.mat-mdc-card {
+  border-radius: 6px !important;
+  border: 1px solid var(--rail);
+  box-shadow: none !important;
+  background: var(--surface) !important;
+}
+
+.mat-mdc-card-title {
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  font-size: 1.05rem !important;
+  color: var(--ink) !important;
+}
+
+.mat-mdc-card-subtitle {
+  font-family: var(--font-mono) !important;
+  font-size: 0.75rem !important;
+  color: var(--ink-faint) !important;
+}
+
+.mdc-button {
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 4px !important;
+}
+
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--accent);
+  --mdc-filled-button-label-text-color: var(--paper);
+}
+
+.mat-mdc-outlined-button {
+  --mdc-outlined-button-outline-color: var(--rail-strong);
+  --mdc-outlined-button-label-text-color: var(--ink);
+}
+
+.mat-mdc-outlined-button.mat-warn {
+  --mdc-outlined-button-label-text-color: var(--signal-stop);
+  --mdc-outlined-button-outline-color: var(--signal-stop);
+}
+
+.mat-mdc-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn {
+  --mat-text-button-label-text-color: var(--signal-stop);
+  --mdc-filled-button-container-color: var(--signal-stop);
+  --mdc-filled-button-label-text-color: var(--surface);
+}
+
+.mat-mdc-button.mat-primary,
+.mat-mdc-text-button.mat-primary {
+  --mat-text-button-label-text-color: var(--accent);
+}
+
+.mat-mdc-form-field,
+.mat-mdc-form-field-infix,
+.mat-mdc-input-element,
+.mdc-floating-label,
+.mat-mdc-floating-label,
+.mat-mdc-select-value,
+.mat-mdc-select-placeholder,
+.mat-mdc-option {
+  font-family: var(--font-body) !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--rail) !important;
+}
+
+.mat-mdc-tab-header {
+  border-bottom: 1px solid var(--rail);
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  color: var(--ink-soft) !important;
+}
+
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--ink) !important;
+}
+
+.mdc-tab-indicator__content--underline {
+  border-color: var(--accent) !important;
+}
+
+.mat-mdc-table {
+  font-family: var(--font-body) !important;
+  background: transparent !important;
+}
+
+.mat-mdc-header-row {
+  background: transparent;
+}
+
+.mat-mdc-header-cell {
+  font-family: var(--font-mono) !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+  color: var(--ink-faint) !important;
+  border-bottom-color: var(--rail) !important;
+}
+
+.mat-mdc-cell,
+.mat-mdc-footer-cell {
+  border-bottom-color: var(--rail) !important;
+  color: var(--ink) !important;
+}
+
+.mat-expansion-panel {
+  box-shadow: none !important;
+  border: 1px solid var(--rail) !important;
+  border-radius: 6px !important;
+  margin-bottom: 0.5rem;
+}
+
+.mat-expansion-panel-header-title {
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  color: var(--ink) !important;
+}
+
+.mat-mdc-checkbox label {
+  font-family: var(--font-body) !important;
+}
+
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-icon-color: var(--accent);
+  --mdc-checkbox-selected-focus-icon-color: var(--accent);
+  --mdc-checkbox-selected-hover-icon-color: var(--accent);
+  --mdc-checkbox-selected-checkmark-color: var(--paper);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--accent);
+  --mdc-checkbox-selected-hover-state-layer-color: var(--accent);
+  --mdc-checkbox-selected-pressed-state-layer-color: var(--accent);
+  --mdc-checkbox-unselected-icon-color: var(--rail-strong);
+  --mdc-checkbox-unselected-focus-icon-color: var(--ink-soft);
+  --mdc-checkbox-unselected-hover-icon-color: var(--ink-soft);
+}
+
+.mdc-linear-progress__bar-inner,
+.mat-mdc-progress-spinner circle {
+  stroke: var(--accent) !important;
+}
+
+/* ---- Badge — el punto de alerta usa el mismo ámbar que el resto del vocabulario
+   "requiere atención" (.is-amber, route-step.is-current, no leídas). ---- */
+.mat-badge-content {
+  --mat-badge-background-color: var(--signal-amber);
+  --mat-badge-text-color: var(--surface);
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+}
+
+/* ---- Menu panel — mismo cromado de superficie que .mat-mdc-card. ---- */
+.mat-mdc-menu-panel {
+  --mat-menu-container-color: var(--surface);
+  border: 1px solid var(--rail);
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 12%, transparent) !important;
+}
+
+.mat-mdc-menu-item {
+  --mat-menu-item-label-text-color: var(--ink);
+  --mat-menu-item-icon-color: var(--ink-soft);
+  --mat-menu-item-hover-state-layer-color: var(--paper);
+  --mat-menu-item-focus-state-layer-color: var(--paper);
+  font-family: var(--font-body) !important;
+}
+
+/* ==========================================================================
+   Notification bell panel — el `class` de <mat-menu> se reenvía al panel
+   flotante del CDK Overlay (fuera del árbol de la app), así que su estilo
+   vive acá y no en el .scss del componente (encapsulado, nunca lo alcanzaría).
+   El ámbar es "requiere tu atención" (no leído); el acento es "esta es la
+   pestaña/acción activa" — dos significados distintos, dos colores distintos.
+   ========================================================================== */
+.notification-panel {
+  width: 380px;
+  max-width: 92vw;
+}
+.notification-panel .mat-mdc-menu-content {
+  padding: 0 !important;
+}
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 0.6rem;
+}
+.notification-header h3 {
+  margin: 0;
+}
+.link-action {
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+}
+.link-action:hover {
+  text-decoration: underline;
+}
+.notification-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--rail);
+}
+.notification-tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 0.5rem 0.5rem 0.6rem;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.notification-tabs .tab:hover {
+  color: var(--ink);
+}
+.notification-tabs .tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.notification-tabs .tab .count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+}
+.notification-tabs .tab.is-active .count {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.notification-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.notification-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--rail);
+  cursor: pointer;
+}
+.notification-item:last-child {
+  border-bottom: none;
+}
+.notification-item:hover {
+  background: var(--paper);
+}
+.notification-item .unread-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: transparent;
+}
+.notification-item.is-unread .unread-dot {
+  background: var(--signal-amber);
+}
+.notification-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.notification-title {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.notification-title strong {
+  font-weight: 600;
+}
+.notification-message {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.notification-time {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+}
+.archive-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.archive-action:hover {
+  background: var(--surface);
+  color: var(--ink-soft);
+}
+.notification-footer {
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--rail);
+  text-align: center;
+}
+.notification-footer a {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+.notification-footer a:hover {
+  text-decoration: underline;
+}
+
+.user-menu-header {
+  padding: 0.75rem 1rem 0.6rem;
+  border-bottom: 1px solid var(--rail);
+  margin-bottom: 0.25rem;
+}
+.user-menu-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.user-menu-email {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.user-menu-tenant {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}

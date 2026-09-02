@@ -1,0 +1,50 @@
+<h2>Reglas</h2>
+<p class="intro">
+  Regla mínima de escalamiento por monto: si el monto de una solicitud alcanza o
+  supera el umbral, se exige una segunda aprobación del rol elegido antes de completarla.
+</p>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else {
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Regla de aprobación por monto</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Monto mínimo que exige segunda aprobación</mat-label>
+        <input matInput type="number" name="minAmount" [(ngModel)]="minAmount" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Rol del segundo aprobador</mat-label>
+        <mat-select name="secondApproverRoleId" [(ngModel)]="secondApproverRoleId">
+          @for (role of roles(); track role.id) {
+            <mat-option [value]="role.id">{{ role.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (currentRule(); as rule) {
+        <p class="current-note">
+          Regla activa: monto ≥ {{ rule.minAmount }} → segunda aprobación de <strong>{{ rule.secondApproverRoleName }}</strong>.
+        </p>
+      } @else {
+        <p class="current-note">Todavía no hay una regla configurada — todas las solicitudes se completan con una sola aprobación.</p>
+      }
+
+      @if (errorMessage(); as error) {
+        <p class="error">{{ error }}</p>
+      }
+      @if (savedMessage()) {
+        <p class="saved-note">Regla guardada.</p>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" [disabled]="saving() || !secondApproverRoleId" (click)="save()">
+        Guardar regla
+      </button>
+    </mat-card-actions>
+  </mat-card>
+}

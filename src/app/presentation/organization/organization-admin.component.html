@@ -1,0 +1,114 @@
+<h2>Organización</h2>
+
+<mat-card class="form-card">
+  <mat-card-header>
+    <mat-card-title>Nueva empresa</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput name="newCompanyName" [(ngModel)]="newCompanyName" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Identificador legal (opcional)</mat-label>
+      <input matInput name="newCompanyLegalIdentifier" [(ngModel)]="newCompanyLegalIdentifier" />
+    </mat-form-field>
+    @if (createCompanyError(); as error) {
+      <p class="error">{{ error }}</p>
+    }
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button color="primary" [disabled]="creatingCompany()" (click)="createCompany()">
+      Crear empresa
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+@if (loading()) {
+  <mat-spinner diameter="32" />
+} @else if (companies().length === 0) {
+  <p>Todavía no hay empresas creadas en este tenant.</p>
+} @else {
+  <mat-accordion multi class="companies">
+    @for (company of companies(); track company.id) {
+      <mat-expansion-panel (opened)="loadBranches(company.id)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ company.name }}</mat-panel-title>
+          @if (company.legalIdentifier) {
+            <mat-panel-description>{{ company.legalIdentifier }}</mat-panel-description>
+          }
+        </mat-expansion-panel-header>
+
+        <div class="panel-body">
+          <div class="inline-form">
+            <mat-form-field appearance="outline" class="inline-field">
+              <mat-label>Nueva sede</mat-label>
+              <input matInput [name]="'newBranch-' + company.id" [(ngModel)]="newBranchName[company.id]" />
+            </mat-form-field>
+            <button
+              mat-stroked-button
+              [disabled]="!newBranchName[company.id] || creatingBranchFor() === company.id"
+              (click)="createBranch(company)"
+            >
+              Crear sede
+            </button>
+          </div>
+          @if (branchError[company.id]; as error) {
+            <p class="error">{{ error }}</p>
+          }
+
+          @if (branchesLoading[company.id]) {
+            <mat-spinner diameter="24" />
+          } @else if ((branchesByCompany[company.id] ?? []).length === 0) {
+            <p class="empty-note">Sin sedes todavía.</p>
+          } @else {
+            <mat-accordion multi>
+              @for (branch of branchesByCompany[company.id]; track branch.id) {
+                <mat-expansion-panel (opened)="loadDepartments(branch.id)">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>{{ branch.name }}</mat-panel-title>
+                  </mat-expansion-panel-header>
+
+                  <div class="panel-body">
+                    <div class="inline-form">
+                      <mat-form-field appearance="outline" class="inline-field">
+                        <mat-label>Nuevo departamento</mat-label>
+                        <input
+                          matInput
+                          [name]="'newDepartment-' + branch.id"
+                          [(ngModel)]="newDepartmentName[branch.id]"
+                        />
+                      </mat-form-field>
+                      <button
+                        mat-stroked-button
+                        [disabled]="!newDepartmentName[branch.id] || creatingDepartmentFor() === branch.id"
+                        (click)="createDepartment(branch)"
+                      >
+                        Crear departamento
+                      </button>
+                    </div>
+                    @if (departmentError[branch.id]; as error) {
+                      <p class="error">{{ error }}</p>
+                    }
+
+                    @if (departmentsLoading[branch.id]) {
+                      <mat-spinner diameter="20" />
+                    } @else if ((departmentsByBranch[branch.id] ?? []).length === 0) {
+                      <p class="empty-note">Sin departamentos todavía.</p>
+                    } @else {
+                      <ul class="department-list">
+                        @for (department of departmentsByBranch[branch.id]; track department.id) {
+                          <li>{{ department.name }}</li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
+            </mat-accordion>
+          }
+        </div>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+}

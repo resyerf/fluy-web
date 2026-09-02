@@ -1,0 +1,33 @@
+<span class="eyebrow">Mi cuenta</span>
+<h2>Perfil</h2>
+
+@if (auth.currentUser(); as user) {
+  <mat-card class="profile-card">
+    <mat-card-content>
+      <div class="profile-header">
+        <span class="profile-avatar">{{ initials(user.fullName) }}</span>
+        <div>
+          <p class="profile-name">{{ user.fullName }}</p>
+          <p class="profile-email">{{ user.email }}</p>
+        </div>
+      </div>
+
+      <dl class="profile-facts">
+        <dt>Tenant</dt>
+        <dd>{{ tenant.tenant() ?? '—' }}</dd>
+
+        <dt>Sede activa</dt>
+        <dd>{{ branch.activeBranch()?.name ?? 'Sin sede seleccionada' }}</dd>
+
+        <dt>Roles</dt>
+        <dd>
+          @for (role of user.roles; track role) {
+            <span class="signal">{{ role }}</span>
+          } @empty {
+            —
+          }
+        </dd>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+}

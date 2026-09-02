@@ -1,0 +1,32 @@
+<mat-toolbar class="shell-toolbar">
+  <a routerLink="/requests" class="brand">
+    <span class="brand-mark">FLUY</span>
+    @if (tenant.tenant(); as subdomain) {
+      <span class="brand-tenant">{{ subdomain }}</span>
+    }
+  </a>
+
+  <nav class="shell-nav">
+    <a routerLink="/requests" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Mis solicitudes</a>
+    <a routerLink="/requests/new" routerLinkActive="is-active">Nueva solicitud</a>
+    <a routerLink="/approvals" routerLinkActive="is-active">Aprobaciones</a>
+    <a routerLink="/identity" routerLinkActive="is-active">Usuarios y roles</a>
+    <a routerLink="/organization" routerLinkActive="is-active">Organización</a>
+    <a routerLink="/workflows" routerLinkActive="is-active">Workflows</a>
+  </nav>
+
+  <span class="spacer"></span>
+
+  @if (branch.activeBranch(); as activeBranch) {
+    <a routerLink="/select-branch" class="branch-tag" title="Cambiar sede">
+      <mat-icon inline="true">store</mat-icon>
+      {{ activeBranch.name }}
+    </a>
+  }
+  <app-notification-bell />
+  <app-user-menu />
+</mat-toolbar>
+
+<main class="shell-content">
+  <router-outlet />
+</main>

@@ -1,0 +1,102 @@
+.page-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rail);
+}
+.page-tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 0.4rem 0.1rem 0.65rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -0.5rem;
+  cursor: pointer;
+}
+.page-tabs .tab:hover {
+  color: var(--ink);
+}
+.page-tabs .tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.page-tabs .tab .count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+}
+.page-tabs .tab.is-active .count {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.mark-all {
+  margin-left: auto;
+}
+.notification-page-list {
+  max-width: 680px;
+  border: 1px solid var(--rail);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.notification-page-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--rail);
+  cursor: pointer;
+}
+.notification-page-item:last-child {
+  border-bottom: none;
+}
+.notification-page-item:hover {
+  background: var(--paper);
+}
+.notification-page-item .unread-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: transparent;
+}
+.notification-page-item.is-unread .unread-dot {
+  background: var(--signal-amber);
+}
+.notification-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.notification-title {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.notification-title strong {
+  font-weight: 600;
+}
+.notification-message {
+  margin: 0.2rem 0 0;
+  font-size: 0.83rem;
+  color: var(--ink-soft);
+}
+.notification-time {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+}

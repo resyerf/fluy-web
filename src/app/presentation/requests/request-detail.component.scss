@@ -1,0 +1,45 @@
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.title-row h2 {
+  margin: 0;
+}
+.detail-route {
+  margin: 1.25rem 0 1.5rem;
+}
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  max-width: 480px;
+  margin-top: 1rem;
+}
+dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  align-self: center;
+}
+dd {
+  margin: 0;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.approval-note {
+  max-width: 480px;
+  border-left: 3px solid var(--rail-strong);
+  padding-left: 0.75rem;
+  margin: 1.25rem 0;
+}
+.approval-note p {
+  margin: 0.25rem 0 0;
+}
+.error {
+  color: var(--signal-stop);
+}
