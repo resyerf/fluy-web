@@ -1,11 +1,11 @@
-<app-modal-shell title="Nuevo usuario" icon="person_add" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell title="Nueva empresa" icon="domain" [closeDisabled]="saving()" (closed)="cancel()">
   <mat-form-field appearance="outline">
-    <mat-label>Email</mat-label>
-    <input matInput name="email" [(ngModel)]="email" />
+    <mat-label>Nombre</mat-label>
+    <input matInput name="name" [(ngModel)]="name" />
   </mat-form-field>
   <mat-form-field appearance="outline">
-    <mat-label>Nombre completo</mat-label>
-    <input matInput name="fullName" [(ngModel)]="fullName" />
+    <mat-label>Identificador legal (opcional)</mat-label>
+    <input matInput name="legalIdentifier" [(ngModel)]="legalIdentifier" />
   </mat-form-field>
   @if (errorMessage(); as error) {
     <p class="error">{{ error }}</p>
@@ -17,7 +17,7 @@
       @if (saving()) {
         <mat-spinner diameter="18" />
       } @else {
-        Crear usuario
+        Crear empresa
       }
     </button>
   </div>

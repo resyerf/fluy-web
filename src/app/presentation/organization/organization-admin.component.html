@@ -1,33 +1,24 @@
-<h2>Organización</h2>
-
-<mat-card class="form-card">
-  <mat-card-header>
-    <mat-card-title>Nueva empresa</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <mat-form-field appearance="outline">
-      <mat-label>Nombre</mat-label>
-      <input matInput name="newCompanyName" [(ngModel)]="newCompanyName" />
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Identificador legal (opcional)</mat-label>
-      <input matInput name="newCompanyLegalIdentifier" [(ngModel)]="newCompanyLegalIdentifier" />
-    </mat-form-field>
-    @if (createCompanyError(); as error) {
-      <p class="error">{{ error }}</p>
-    }
-  </mat-card-content>
-  <mat-card-actions>
-    <button mat-flat-button color="primary" [disabled]="creatingCompany()" (click)="createCompany()">
-      Crear empresa
-    </button>
-  </mat-card-actions>
-</mat-card>
+<div class="page-header">
+  <h2>Organización</h2>
+  <button mat-flat-button color="primary" class="page-action" (click)="openCreateCompanyDialog()">
+    <mat-icon>add</mat-icon>
+    Nueva empresa
+  </button>
+</div>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else if (companies().length === 0) {
-  <p>Todavía no hay empresas creadas en este tenant.</p>
+  <div class="empty-state">
+    <mat-icon>domain</mat-icon>
+    <p>Todavía no hay empresas creadas en este tenant. Empezá por la primera.</p>
+    <button mat-flat-button color="primary" (click)="openCreateCompanyDialog()">
+      <mat-icon>add</mat-icon>
+      Nueva empresa
+    </button>
+  </div>
 } @else {
   <mat-accordion multi class="companies">
     @for (company of companies(); track company.id) {
@@ -40,27 +31,68 @@
         </mat-expansion-panel-header>
 
         <div class="panel-body">
-          <div class="inline-form">
-            <mat-form-field appearance="outline" class="inline-field">
-              <mat-label>Nueva sede</mat-label>
-              <input matInput [name]="'newBranch-' + company.id" [(ngModel)]="newBranchName[company.id]" />
-            </mat-form-field>
-            <button
-              mat-stroked-button
-              [disabled]="!newBranchName[company.id] || creatingBranchFor() === company.id"
-              (click)="createBranch(company)"
-            >
-              Crear sede
-            </button>
+          <div class="panel-toolbar">
+            <span class="panel-toolbar-label">Sedes</span>
+            @if (!creatingBranchFor[company.id]) {
+              <button mat-stroked-button (click)="startCreateBranch(company)">
+                <mat-icon>add</mat-icon>
+                Nueva sede
+              </button>
+            }
           </div>
-          @if (branchError[company.id]; as error) {
-            <p class="error">{{ error }}</p>
+
+          @if (creatingBranchFor[company.id]) {
+            <form class="compose-row" (ngSubmit)="submitCreateBranch(company)">
+              <mat-icon class="compose-icon">store</mat-icon>
+              <input
+                class="compose-input"
+                type="text"
+                name="branchDraftName"
+                placeholder="Nombre de la sede"
+                aria-label="Nombre de la sede"
+                [(ngModel)]="branchDraftName[company.id]"
+                [disabled]="branchSaving[company.id]"
+                autofocus
+              />
+              <div class="compose-actions">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="compose-cancel"
+                  [disabled]="branchSaving[company.id]"
+                  (click)="cancelCreateBranch(company.id)"
+                  aria-label="Cancelar"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="submit"
+                  class="compose-confirm"
+                  [disabled]="branchSaving[company.id]"
+                  aria-label="Guardar sede"
+                >
+                  @if (branchSaving[company.id]) {
+                    <mat-spinner diameter="18" />
+                  } @else {
+                    <mat-icon>check</mat-icon>
+                  }
+                </button>
+              </div>
+              @if (branchError[company.id]; as error) {
+                <p class="compose-error">{{ error }}</p>
+              }
+            </form>
           }
 
           @if (branchesLoading[company.id]) {
-            <mat-spinner diameter="24" />
+            <div class="loading-state loading-state-compact">
+              <mat-spinner diameter="24" />
+            </div>
           } @else if ((branchesByCompany[company.id] ?? []).length === 0) {
-            <p class="empty-note">Sin sedes todavía.</p>
+            @if (!creatingBranchFor[company.id]) {
+              <p class="empty-note">Sin sedes todavía.</p>
+            }
           } @else {
             <mat-accordion multi>
               @for (branch of branchesByCompany[company.id]; track branch.id) {
@@ -70,31 +102,68 @@
                   </mat-expansion-panel-header>
 
                   <div class="panel-body">
-                    <div class="inline-form">
-                      <mat-form-field appearance="outline" class="inline-field">
-                        <mat-label>Nuevo departamento</mat-label>
-                        <input
-                          matInput
-                          [name]="'newDepartment-' + branch.id"
-                          [(ngModel)]="newDepartmentName[branch.id]"
-                        />
-                      </mat-form-field>
-                      <button
-                        mat-stroked-button
-                        [disabled]="!newDepartmentName[branch.id] || creatingDepartmentFor() === branch.id"
-                        (click)="createDepartment(branch)"
-                      >
-                        Crear departamento
-                      </button>
+                    <div class="panel-toolbar">
+                      <span class="panel-toolbar-label">Departamentos</span>
+                      @if (!creatingDepartmentFor[branch.id]) {
+                        <button mat-stroked-button (click)="startCreateDepartment(branch)">
+                          <mat-icon>add</mat-icon>
+                          Nuevo departamento
+                        </button>
+                      }
                     </div>
-                    @if (departmentError[branch.id]; as error) {
-                      <p class="error">{{ error }}</p>
+
+                    @if (creatingDepartmentFor[branch.id]) {
+                      <form class="compose-row" (ngSubmit)="submitCreateDepartment(branch)">
+                        <mat-icon class="compose-icon">apartment</mat-icon>
+                        <input
+                          class="compose-input"
+                          type="text"
+                          name="departmentDraftName"
+                          placeholder="Nombre del departamento"
+                          aria-label="Nombre del departamento"
+                          [(ngModel)]="departmentDraftName[branch.id]"
+                          [disabled]="departmentSaving[branch.id]"
+                          autofocus
+                        />
+                        <div class="compose-actions">
+                          <button
+                            mat-icon-button
+                            type="button"
+                            class="compose-cancel"
+                            [disabled]="departmentSaving[branch.id]"
+                            (click)="cancelCreateDepartment(branch.id)"
+                            aria-label="Cancelar"
+                          >
+                            <mat-icon>close</mat-icon>
+                          </button>
+                          <button
+                            mat-icon-button
+                            type="submit"
+                            class="compose-confirm"
+                            [disabled]="departmentSaving[branch.id]"
+                            aria-label="Guardar departamento"
+                          >
+                            @if (departmentSaving[branch.id]) {
+                              <mat-spinner diameter="18" />
+                            } @else {
+                              <mat-icon>check</mat-icon>
+                            }
+                          </button>
+                        </div>
+                        @if (departmentError[branch.id]; as error) {
+                          <p class="compose-error">{{ error }}</p>
+                        }
+                      </form>
                     }
 
                     @if (departmentsLoading[branch.id]) {
-                      <mat-spinner diameter="20" />
+                      <div class="loading-state loading-state-compact">
+                        <mat-spinner diameter="20" />
+                      </div>
                     } @else if ((departmentsByBranch[branch.id] ?? []).length === 0) {
-                      <p class="empty-note">Sin departamentos todavía.</p>
+                      @if (!creatingDepartmentFor[branch.id]) {
+                        <p class="empty-note">Sin departamentos todavía.</p>
+                      }
                     } @else {
                       <ul class="department-list">
                         @for (department of departmentsByBranch[branch.id]; track department.id) {

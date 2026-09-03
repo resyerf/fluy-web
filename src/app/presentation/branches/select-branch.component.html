@@ -1,9 +1,10 @@
 <div class="wrap">
-  <span class="eyebrow">Elegí dónde trabajar</span>
   <h2>Seleccioná una sede</h2>
 
   @if (loading()) {
-    <mat-spinner diameter="32" />
+    <div class="loading-state">
+      <mat-spinner diameter="32" />
+    </div>
   } @else {
     <div class="branch-grid">
       @for (branch of branches(); track branch.id) {

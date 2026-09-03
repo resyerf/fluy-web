@@ -1,32 +1,62 @@
-<mat-toolbar class="shell-toolbar">
-  <a routerLink="/requests" class="brand">
-    <span class="brand-mark">FLUY</span>
-    @if (tenant.tenant(); as subdomain) {
-      <span class="brand-tenant">{{ subdomain }}</span>
-    }
-  </a>
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav #drawer class="shell-drawer" mode="over" position="start" [fixedInViewport]="true">
+    <div class="drawer-header">
+      <span class="brand-mark">FLUY</span>
+      <button mat-icon-button (click)="drawer.close()" aria-label="Cerrar menú">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      @for (link of navLinks; track link.path) {
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: !!link.exact }"
+          (click)="drawer.close()"
+        >
+          <mat-icon>{{ link.icon }}</mat-icon>
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+  </mat-sidenav>
 
-  <nav class="shell-nav">
-    <a routerLink="/requests" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Mis solicitudes</a>
-    <a routerLink="/requests/new" routerLinkActive="is-active">Nueva solicitud</a>
-    <a routerLink="/approvals" routerLinkActive="is-active">Aprobaciones</a>
-    <a routerLink="/identity" routerLinkActive="is-active">Usuarios y roles</a>
-    <a routerLink="/organization" routerLinkActive="is-active">Organización</a>
-    <a routerLink="/workflows" routerLinkActive="is-active">Workflows</a>
-  </nav>
+  <mat-sidenav-content>
+    <mat-toolbar class="shell-toolbar">
+      <button mat-icon-button class="nav-toggle" (click)="drawer.toggle()" aria-label="Abrir menú">
+        <mat-icon>menu</mat-icon>
+      </button>
 
-  <span class="spacer"></span>
+      <a routerLink="/requests" class="brand">
+        <span class="brand-mark">FLUY</span>
+        @if (tenant.tenant(); as subdomain) {
+          <span class="brand-tenant">{{ subdomain }}</span>
+        }
+      </a>
 
-  @if (branch.activeBranch(); as activeBranch) {
-    <a routerLink="/select-branch" class="branch-tag" title="Cambiar sede">
-      <mat-icon inline="true">store</mat-icon>
-      {{ activeBranch.name }}
-    </a>
-  }
-  <app-notification-bell />
-  <app-user-menu />
-</mat-toolbar>
+      <nav class="shell-nav">
+        @for (link of navLinks; track link.path) {
+          <a [routerLink]="link.path" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: !!link.exact }">
+            <mat-icon inline="true">{{ link.icon }}</mat-icon>
+            {{ link.label }}
+          </a>
+        }
+      </nav>
 
-<main class="shell-content">
-  <router-outlet />
-</main>
+      <span class="spacer"></span>
+
+      @if (branch.activeBranch(); as activeBranch) {
+        <a routerLink="/select-branch" class="branch-tag" title="Cambiar sede">
+          <mat-icon inline="true">store</mat-icon>
+          {{ activeBranch.name }}
+        </a>
+      }
+      <app-notification-bell />
+      <app-user-menu />
+    </mat-toolbar>
+
+    <main class="shell-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

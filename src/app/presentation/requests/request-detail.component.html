@@ -1,5 +1,7 @@
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else {
   @if (request(); as request) {
     <div class="title-row">
@@ -29,7 +31,7 @@
       <dt>Descripción</dt>
       <dd>{{ request.description || '—' }}</dd>
       <dt>Monto</dt>
-      <dd class="mono">{{ request.amount ?? '—' }}</dd>
+      <dd class="mono">{{ request.amount != null ? (request.amount | number: '1.0-2') : '—' }}</dd>
       <dt>Enviada</dt>
       <dd class="mono">{{ request.submittedAt ?? 'Todavía no' }}</dd>
     </dl>
@@ -62,8 +64,82 @@
       <p class="error">{{ error }}</p>
     }
 
+    <section class="documents-section">
+      <div class="section-header">
+        <span class="section-label">Documentos</span>
+        <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+        <button mat-button type="button" [disabled]="uploading()" (click)="triggerFilePicker()">
+          @if (uploading()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon>attach_file</mat-icon>
+          }
+          Adjuntar
+        </button>
+      </div>
+
+      @if (uploadError(); as error) {
+        <p class="error">{{ error }}</p>
+      }
+
+      @if (documents().length === 0) {
+        <p class="empty-note">Sin documentos adjuntos.</p>
+      } @else {
+        <ul class="document-list">
+          @for (doc of documents(); track doc.id) {
+            <li>
+              <mat-icon>description</mat-icon>
+              <span class="document-name">{{ doc.fileName }}</span>
+              <span class="document-meta mono">{{ (doc.sizeBytes / 1024) | number: '1.0-0' }} KB</span>
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="downloadingId() === doc.id"
+                (click)="downloadDocument(doc)"
+                aria-label="Descargar"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="audit-section">
+      <button mat-button type="button" (click)="toggleAudit()">
+        <mat-icon>{{ showAudit() ? 'expand_less' : 'history' }}</mat-icon>
+        Auditoría
+      </button>
+
+      @if (showAudit()) {
+        @if (auditEvents().length === 0) {
+          <p class="empty-note">Sin eventos de auditoría todavía.</p>
+        } @else {
+          <ul class="audit-list">
+            @for (event of auditEvents(); track event.id) {
+              <li>
+                <span class="audit-dot"></span>
+                <div class="audit-body">
+                  <span class="audit-action">{{ auditActionLabel[event.action] ?? event.action }}</span>
+                  <span class="audit-time mono">{{ event.createdAt | date: 'short' }}</span>
+                  @if (event.comment) {
+                    <p class="audit-comment">{{ event.comment }}</p>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+
     <p><a mat-button routerLink="/requests">← Volver al listado</a></p>
   } @else {
-    <p>No se encontró la solicitud.</p>
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No se encontró la solicitud — puede que ya no exista o que no tengas acceso.</p>
+      <a mat-button routerLink="/requests">← Volver al listado</a>
+    </div>
   }
 }

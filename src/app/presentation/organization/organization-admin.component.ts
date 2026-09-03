@@ -1,75 +1,125 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { OrganizationRepository } from '../../application/organization/organization-repository.port';
 import { Branch, Company, Department } from '../../domain/organization/organization.model';
+import { CreateCompanyDialogComponent } from './create-company-dialog.component';
 
 @Component({
   selector: 'app-organization-admin',
   standalone: true,
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule
-  ],
+  imports: [FormsModule, MatButtonModule, MatExpansionModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './organization-admin.component.html',
   styleUrl: './organization-admin.component.scss'
 })
 export class OrganizationAdminComponent {
   private readonly repository = inject(OrganizationRepository);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly loading = signal(true);
   protected readonly companies = signal<Company[]>([]);
 
-  protected newCompanyName = '';
-  protected newCompanyLegalIdentifier = '';
-  protected readonly creatingCompany = signal(false);
-  protected readonly createCompanyError = signal<string | null>(null);
-
   protected readonly branchesByCompany: Record<string, Branch[] | undefined> = {};
   protected readonly branchesLoading: Record<string, boolean> = {};
-  protected readonly newBranchName: Record<string, string> = {};
-  protected readonly creatingBranchFor = signal<string | null>(null);
-  protected readonly branchError: Record<string, string> = {};
 
   protected readonly departmentsByBranch: Record<string, Department[] | undefined> = {};
   protected readonly departmentsLoading: Record<string, boolean> = {};
-  protected readonly newDepartmentName: Record<string, string> = {};
-  protected readonly creatingDepartmentFor = signal<string | null>(null);
+
+  // Sedes y departamentos se crean inline (el usuario ya está mirando al padre
+  // dentro de su panel expandido — un modal centrado interrumpiría un
+  // contexto en el que ya está parado). Empresa sigue siendo un diálogo:
+  // es una acción de nivel raíz, sin panel padre del que colgar la fila.
+  protected readonly creatingBranchFor: Record<string, boolean> = {};
+  protected readonly branchDraftName: Record<string, string> = {};
+  protected readonly branchSaving: Record<string, boolean> = {};
+  protected readonly branchError: Record<string, string> = {};
+
+  protected readonly creatingDepartmentFor: Record<string, boolean> = {};
+  protected readonly departmentDraftName: Record<string, string> = {};
+  protected readonly departmentSaving: Record<string, boolean> = {};
   protected readonly departmentError: Record<string, string> = {};
 
   constructor() {
     this.loadCompanies();
   }
 
-  createCompany(): void {
-    if (!this.newCompanyName.trim()) {
-      this.createCompanyError.set('El nombre de la empresa es obligatorio.');
+  openCreateCompanyDialog(): void {
+    this.dialog
+      .open(CreateCompanyDialogComponent, { width: '440px' })
+      .afterClosed()
+      .subscribe((created) => {
+        if (created) {
+          this.loadCompanies();
+        }
+      });
+  }
+
+  startCreateBranch(company: Company): void {
+    this.creatingBranchFor[company.id] = true;
+    this.branchDraftName[company.id] = '';
+    delete this.branchError[company.id];
+  }
+
+  cancelCreateBranch(companyId: string): void {
+    this.creatingBranchFor[companyId] = false;
+  }
+
+  submitCreateBranch(company: Company): void {
+    const name = (this.branchDraftName[company.id] ?? '').trim();
+    if (!name) {
+      this.branchError[company.id] = 'El nombre de la sede es obligatorio.';
       return;
     }
 
-    this.creatingCompany.set(true);
-    this.createCompanyError.set(null);
+    delete this.branchError[company.id];
+    this.branchSaving[company.id] = true;
 
-    this.repository.createCompany(this.newCompanyName.trim(), this.newCompanyLegalIdentifier.trim() || null).subscribe({
+    this.repository.createBranch(company.id, name).subscribe({
       next: () => {
-        this.creatingCompany.set(false);
-        this.newCompanyName = '';
-        this.newCompanyLegalIdentifier = '';
-        this.loadCompanies();
+        this.branchSaving[company.id] = false;
+        this.creatingBranchFor[company.id] = false;
+        this.loadBranches(company.id);
       },
       error: (error) => {
-        this.creatingCompany.set(false);
-        this.createCompanyError.set(error?.error?.detail ?? 'No se pudo crear la empresa.');
+        this.branchSaving[company.id] = false;
+        this.branchError[company.id] = error?.error?.detail ?? 'No se pudo crear la sede.';
+      }
+    });
+  }
+
+  startCreateDepartment(branch: Branch): void {
+    this.creatingDepartmentFor[branch.id] = true;
+    this.departmentDraftName[branch.id] = '';
+    delete this.departmentError[branch.id];
+  }
+
+  cancelCreateDepartment(branchId: string): void {
+    this.creatingDepartmentFor[branchId] = false;
+  }
+
+  submitCreateDepartment(branch: Branch): void {
+    const name = (this.departmentDraftName[branch.id] ?? '').trim();
+    if (!name) {
+      this.departmentError[branch.id] = 'El nombre del departamento es obligatorio.';
+      return;
+    }
+
+    delete this.departmentError[branch.id];
+    this.departmentSaving[branch.id] = true;
+
+    this.repository.createDepartment(branch.id, name).subscribe({
+      next: () => {
+        this.departmentSaving[branch.id] = false;
+        this.creatingDepartmentFor[branch.id] = false;
+        this.loadDepartments(branch.id);
+      },
+      error: (error) => {
+        this.departmentSaving[branch.id] = false;
+        this.departmentError[branch.id] = error?.error?.detail ?? 'No se pudo crear el departamento.';
       }
     });
   }
@@ -87,28 +137,6 @@ export class OrganizationAdminComponent {
     });
   }
 
-  createBranch(company: Company): void {
-    const name = this.newBranchName[company.id];
-    if (!name?.trim()) {
-      return;
-    }
-
-    delete this.branchError[company.id];
-    this.creatingBranchFor.set(company.id);
-
-    this.repository.createBranch(company.id, name.trim()).subscribe({
-      next: () => {
-        this.creatingBranchFor.set(null);
-        this.newBranchName[company.id] = '';
-        this.loadBranches(company.id);
-      },
-      error: (error) => {
-        this.creatingBranchFor.set(null);
-        this.branchError[company.id] = error?.error?.detail ?? 'No se pudo crear la sede.';
-      }
-    });
-  }
-
   loadDepartments(branchId: string): void {
     this.departmentsLoading[branchId] = true;
     this.repository.getDepartments(branchId).subscribe({
@@ -118,28 +146,6 @@ export class OrganizationAdminComponent {
       },
       error: () => {
         this.departmentsLoading[branchId] = false;
-      }
-    });
-  }
-
-  createDepartment(branch: Branch): void {
-    const name = this.newDepartmentName[branch.id];
-    if (!name?.trim()) {
-      return;
-    }
-
-    delete this.departmentError[branch.id];
-    this.creatingDepartmentFor.set(branch.id);
-
-    this.repository.createDepartment(branch.id, name.trim()).subscribe({
-      next: () => {
-        this.creatingDepartmentFor.set(null);
-        this.newDepartmentName[branch.id] = '';
-        this.loadDepartments(branch.id);
-      },
-      error: (error) => {
-        this.creatingDepartmentFor.set(null);
-        this.departmentError[branch.id] = error?.error?.detail ?? 'No se pudo crear el departamento.';
       }
     });
   }

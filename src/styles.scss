@@ -48,6 +48,24 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---- browser surfaces: the parts nobody draws still carry the system ---- */
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mono,
+.route-meta,
+dd.mono,
+td.mono {
+  font-variant-numeric: tabular-nums;
+}
+
 h1,
 h2,
 h3 {
@@ -94,7 +112,79 @@ a:visited {
   max-width: 1040px;
 }
 
-/* ---- eyebrow / manifest label: used above a page title to name the record type ---- */
+/* ---- page header: title + primary "create" action for a list screen ---- */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.page-header h2 {
+  margin-bottom: 0;
+}
+.page-action {
+  flex-shrink: 0;
+}
+.page-action mat-icon {
+  margin-right: 0.25rem;
+}
+
+/* ---- loading / empty states: shared shape so every list reads the same
+   while it has nothing to show yet. Centered, muted, never a bare spinner
+   stuck at the top-left of the page. ---- */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  max-width: 480px;
+  padding: 1.75rem 0;
+  color: var(--ink-soft);
+}
+.empty-state mat-icon {
+  color: var(--ink-faint);
+}
+.empty-state p {
+  margin: 0;
+}
+
+/* ---- notice: a status sentence that needs the dot-carries-color rule too —
+   same vocabulary as .signal, just full sentences instead of a status word. ---- */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.notice::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  margin-top: 0.4em;
+  border-radius: 50%;
+  background: var(--rail-strong);
+}
+.notice.is-go::before {
+  background: var(--signal-go);
+}
+.notice.is-amber::before {
+  background: var(--signal-amber);
+}
+
+/* ---- eyebrow / manifest label: contextual metadata inline with content
+   (which company a new branch belongs to, whose comment this is) — never a
+   kicker sitting above a page's own h1/h2, the heading already carries that. ---- */
 .eyebrow {
   display: block;
   font-family: var(--font-mono);
@@ -361,6 +451,22 @@ a:visited {
   color: var(--ink) !important;
 }
 
+/* Material's own compiled CSS ships .mat-mdc-dialog-surface with
+   box-shadow: var(--mat-dialog-container-elevation-shadow, none) and
+   border-radius: var(--mat-sys-corner-extra-large, 4px) — neither custom
+   property is set anywhere in this app (the prebuilt theme only defines
+   --mat-sys-corner-extra-large itself, at 28px, and never the shadow one),
+   so every dialog in the app has been rendering with a 28px radius and
+   *zero* shadow: a flat, overly-rounded card with nothing to lift it off
+   the backdrop. This is the actual cause of dialogs reading as generic/
+   washed-out, not a missing custom skin. */
+.mat-mdc-dialog-surface {
+  border-radius: 10px !important;
+  box-shadow:
+    0 24px 48px -16px color-mix(in srgb, var(--ink) 30%, transparent),
+    0 4px 14px color-mix(in srgb, var(--ink) 14%, transparent) !important;
+}
+
 .mat-expansion-panel {
   box-shadow: none !important;
   border: 1px solid var(--rail) !important;
@@ -396,6 +502,13 @@ a:visited {
   stroke: var(--accent) !important;
 }
 
+/* A spinner dropped inside a filled primary button would otherwise stroke in
+   --accent on an --accent fill — invisible while the button is doing exactly
+   the thing it needs to show. */
+.mat-mdc-unelevated-button.mat-primary .mat-mdc-progress-spinner circle {
+  stroke: var(--paper) !important;
+}
+
 /* ---- Badge — el punto de alerta usa el mismo ámbar que el resto del vocabulario
    "requiere atención" (.is-amber, route-step.is-current, no leídas). ---- */
 .mat-badge-content {
@@ -406,6 +519,15 @@ a:visited {
 }
 
 /* ---- Menu panel — mismo cromado de superficie que .mat-mdc-card. ---- */
+/* Material ships mat-dialog-actions with a border-top that's transparent by
+   default (rgba(0,0,0,0)), waiting for a theme to color it in — nothing
+   here ever did, so every dialog footer had an invisible rule doing
+   nothing. Coloring it makes header/body/footer a symmetric three-part
+   frame instead of a floating row of buttons. */
+.mat-mdc-dialog-actions {
+  border-top-color: var(--rail) !important;
+}
+
 .mat-mdc-menu-panel {
   --mat-menu-container-color: var(--surface);
   border: 1px solid var(--rail);
@@ -428,6 +550,28 @@ a:visited {
    El ámbar es "requiere tu atención" (no leído); el acento es "esta es la
    pestaña/acción activa" — dos significados distintos, dos colores distintos.
    ========================================================================== */
+/* ==========================================================================
+   Side-panel dialog — a MatDialog anchored to the right edge instead of
+   centered, full viewport height. Reserved for content that can genuinely
+   grow past what a small centered box holds well (today: the role
+   permission grid, which scales with the tenant's permission catalog).
+   Mechanically it is still MatDialog/CDK Overlay — the same proven plumbing
+   as every other dialog in this app — only position and shape change.
+   Verified against Material's own built dialog CSS: .mat-mdc-dialog-surface
+   is already flex/column/height:100%, so the header and the footer
+   (mat-dialog-actions, flex-shrink:0) stay put and only the body scrolls;
+   the one override needed is the content's own 65vh cap. panelClass reaches
+   the CDK overlay pane, which renders outside this app's component tree —
+   has to live here, same reason as .notification-panel below.
+   ========================================================================== */
+.side-panel-dialog .mat-mdc-dialog-surface {
+  border-radius: 0 !important;
+  box-shadow: -12px 0 32px color-mix(in srgb, var(--ink) 14%, transparent) !important;
+}
+.side-panel-dialog .mat-mdc-dialog-content {
+  max-height: none !important;
+}
+
 .notification-panel {
   width: 380px;
   max-width: 92vw;
@@ -522,6 +666,10 @@ a:visited {
 }
 .notification-item:hover {
   background: var(--paper);
+}
+.notification-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 .notification-item .unread-dot {
   width: 8px;

@@ -1,11 +1,11 @@
-<app-modal-shell title="Nuevo usuario" icon="person_add" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell title="Nuevo workflow" icon="route" [closeDisabled]="saving()" (closed)="cancel()">
   <mat-form-field appearance="outline">
-    <mat-label>Email</mat-label>
-    <input matInput name="email" [(ngModel)]="email" />
+    <mat-label>Nombre</mat-label>
+    <input matInput name="name" [(ngModel)]="name" />
   </mat-form-field>
   <mat-form-field appearance="outline">
-    <mat-label>Nombre completo</mat-label>
-    <input matInput name="fullName" [(ngModel)]="fullName" />
+    <mat-label>Descripción</mat-label>
+    <input matInput name="description" [(ngModel)]="description" />
   </mat-form-field>
   @if (errorMessage(); as error) {
     <p class="error">{{ error }}</p>
@@ -13,11 +13,11 @@
 
   <div modalFooter>
     <button mat-button [disabled]="saving()" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" [disabled]="saving()" (click)="submit()">
+    <button mat-flat-button color="primary" [disabled]="saving() || !name" (click)="submit()">
       @if (saving()) {
         <mat-spinner diameter="18" />
       } @else {
-        Crear usuario
+        Crear workflow
       }
     </button>
   </div>

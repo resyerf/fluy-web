@@ -8,9 +8,46 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IdentityRepository } from '../../application/identity/identity-repository.port';
 import { PermissionCatalogItem } from '../../domain/identity/identity.model';
+import { ModalShellComponent } from '../../shared/components/modal-shell/modal-shell.component';
 
 export interface CreateRoleDialogData {
   permissions: PermissionCatalogItem[];
+}
+
+interface PermissionGroup {
+  label: string;
+  items: PermissionCatalogItem[];
+}
+
+const GROUP_LABELS: Record<string, string> = {
+  request: 'Solicitudes',
+  organization: 'Organización',
+  workflow: 'Workflows',
+  rules: 'Reglas',
+  users: 'Usuarios',
+  roles: 'Roles',
+  audit: 'Auditoría',
+  billing: 'Facturación',
+  subscription: 'Suscripción'
+};
+
+function groupPermissions(permissions: PermissionCatalogItem[]): PermissionGroup[] {
+  const byPrefix = new Map<string, PermissionCatalogItem[]>();
+
+  for (const permission of permissions) {
+    const prefix = permission.code.split('.')[0];
+    const items = byPrefix.get(prefix);
+    if (items) {
+      items.push(permission);
+    } else {
+      byPrefix.set(prefix, [permission]);
+    }
+  }
+
+  return Array.from(byPrefix.entries()).map(([prefix, items]) => ({
+    label: GROUP_LABELS[prefix] ?? prefix,
+    items
+  }));
 }
 
 @Component({
@@ -23,7 +60,8 @@ export interface CreateRoleDialogData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    ModalShellComponent
   ],
   templateUrl: './create-role-dialog.component.html',
   styleUrl: './create-role-dialog.component.scss'
@@ -32,6 +70,7 @@ export class CreateRoleDialogComponent {
   private readonly repository = inject(IdentityRepository);
   private readonly dialogRef = inject(MatDialogRef<CreateRoleDialogComponent, boolean | null>);
   protected readonly data = inject<CreateRoleDialogData>(MAT_DIALOG_DATA);
+  protected readonly groups = groupPermissions(this.data.permissions);
 
   protected name = '';
   protected readonly selectedPermissions: Record<string, boolean> = {};

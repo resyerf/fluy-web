@@ -1,10 +1,20 @@
-<h2>Workflows</h2>
-<p class="intro">
-  Motor de Workflow genérico
-</p>
+<div class="page-header">
+  <div>
+    <h2>Workflows</h2>
+    <p class="intro">Motor de Workflow genérico</p>
+  </div>
+  @if (!editingVersionId()) {
+    <button mat-flat-button color="primary" class="page-action" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nuevo workflow
+    </button>
+  }
+</div>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else {
   @if (!editingVersionId()) {
     <mat-card class="list-card">
@@ -36,28 +46,6 @@
           }
         }
       </mat-card-content>
-    </mat-card>
-
-    <mat-card class="form-card">
-      <mat-card-header>
-        <mat-card-title>Nuevo workflow</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre</mat-label>
-          <input matInput name="newName" [(ngModel)]="newName" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Descripción</mat-label>
-          <input matInput name="newDescription" [(ngModel)]="newDescription" />
-        </mat-form-field>
-        @if (errorMessage(); as error) {
-          <p class="error">{{ error }}</p>
-        }
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary" [disabled]="!newName" (click)="createDefinition()">Crear workflow</button>
-      </mat-card-actions>
     </mat-card>
   } @else if (editingVersion()) {
     @if (editingVersion(); as version) {

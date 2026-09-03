@@ -1,4 +1,3 @@
-<span class="eyebrow">Notification Center</span>
 <h2>Notificaciones</h2>
 
 <div class="page-tabs">
@@ -18,13 +17,34 @@
 </div>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else if (result().items.length === 0) {
-  <p>No hay notificaciones aquí.</p>
+  <div class="empty-state">
+    <mat-icon>notifications_none</mat-icon>
+    <p>
+      @if (filter() === 'Unread') {
+        No tenés notificaciones sin leer.
+      } @else if (filter() === 'Archived') {
+        No archivaste ninguna notificación todavía.
+      } @else {
+        Todavía no hay notificaciones — te van a aparecer acá apenas alguien mueva una de tus solicitudes.
+      }
+    </p>
+  </div>
 } @else {
   <div class="notification-page-list">
     @for (item of result().items; track item.id) {
-      <div class="notification-page-item" [class.is-unread]="!item.isRead" (click)="open(item)">
+      <div
+        class="notification-page-item"
+        [class.is-unread]="!item.isRead"
+        role="button"
+        tabindex="0"
+        (click)="open(item)"
+        (keydown.enter)="open(item)"
+        (keydown.space)="$event.preventDefault(); open(item)"
+      >
         <span class="unread-dot"></span>
         <div class="notification-body">
           <p class="notification-title">
@@ -37,7 +57,13 @@
           <span class="notification-time">{{ timeAgo(item.createdAt) }}</span>
         </div>
         @if (filter() !== 'Archived') {
-          <button mat-icon-button [disabled]="busyId() === item.id" (click)="archive(item, $event)" aria-label="Archivar">
+          <button
+            mat-icon-button
+            [disabled]="busyId() === item.id"
+            (click)="archive(item, $event)"
+            (keydown)="$event.stopPropagation()"
+            aria-label="Archivar"
+          >
             <mat-icon>archive</mat-icon>
           </button>
         }

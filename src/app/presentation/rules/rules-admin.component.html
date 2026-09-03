@@ -5,7 +5,9 @@
 </p>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else {
   <mat-card class="form-card">
     <mat-card-header>

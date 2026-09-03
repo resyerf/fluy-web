@@ -1,12 +1,24 @@
-<h2>Mis solicitudes</h2>
+<div class="page-header">
+  <h2>Mis solicitudes</h2>
+  <button mat-flat-button color="primary" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    Nueva solicitud
+  </button>
+</div>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else if (requests().length === 0) {
-  <p>
-    No tienes solicitudes todavía.
-    <a mat-button color="primary" routerLink="/requests/new">Crear una</a>
-  </p>
+  <div class="empty-state">
+    <mat-icon>inbox</mat-icon>
+    <p>Todavía no creaste ninguna solicitud. Empezá una para que entre a su vía de aprobación.</p>
+    <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nueva solicitud
+    </button>
+  </div>
 } @else {
   <div class="table-scroll">
     <table mat-table [dataSource]="requests()">
@@ -19,7 +31,7 @@
 
       <ng-container matColumnDef="amount">
         <th mat-header-cell *matHeaderCellDef>Monto</th>
-        <td mat-cell *matCellDef="let request">{{ request.amount ?? '—' }}</td>
+        <td class="mono" mat-cell *matCellDef="let request">{{ request.amount != null ? (request.amount | number: '1.0-2') : '—' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="status">

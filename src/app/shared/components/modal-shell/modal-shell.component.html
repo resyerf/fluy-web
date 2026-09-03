@@ -1,0 +1,28 @@
+<header class="modal-shell-header">
+  <div class="modal-shell-heading">
+    @if (icon(); as iconName) {
+      <span class="modal-shell-icon">
+        <mat-icon>{{ iconName }}</mat-icon>
+      </span>
+    }
+    <h2 mat-dialog-title>{{ title() }}</h2>
+  </div>
+  <button
+    mat-icon-button
+    type="button"
+    class="modal-shell-close"
+    [disabled]="closeDisabled()"
+    (click)="closed.emit()"
+    aria-label="Cerrar"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<div mat-dialog-content class="modal-shell-body">
+  <ng-content />
+</div>
+
+<div mat-dialog-actions align="end" class="modal-shell-footer">
+  <ng-content select="[modalFooter]" />
+</div>

@@ -1,7 +1,9 @@
 <h2>Usuarios y roles</h2>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else {
   <mat-tab-group>
     <mat-tab label="Usuarios">
@@ -14,9 +16,9 @@
         </div>
         @if (lastCreatedUserEmailSent() !== null) {
           @if (lastCreatedUserEmailSent()) {
-            <p class="token-note">Usuario creado. Se envió un email de activación.</p>
+            <p class="notice is-go">Usuario creado. Se envió un email de activación.</p>
           } @else {
-            <p class="warning-note">Usuario creado, pero no se pudo enviar el email de activación — avisale por otro medio.</p>
+            <p class="notice is-amber">Usuario creado, pero no se pudo enviar el email de activación — avisale por otro medio.</p>
           }
         }
 

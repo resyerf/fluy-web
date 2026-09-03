@@ -1,9 +1,14 @@
 <h2>Aprobaciones pendientes</h2>
 
 @if (loading()) {
-  <mat-spinner diameter="32" />
+  <div class="loading-state">
+    <mat-spinner diameter="32" />
+  </div>
 } @else if (items().length === 0) {
-  <p>No hay solicitudes esperando tu revisión.</p>
+  <div class="empty-state">
+    <mat-icon>fact_check</mat-icon>
+    <p>No hay solicitudes esperando tu revisión — al día.</p>
+  </div>
 } @else {
   <div class="approval-list">
     @for (item of items(); track item.approvalId) {
@@ -12,7 +17,7 @@
           <mat-card-title>
             <a [routerLink]="['/requests', item.requestId]">{{ item.requestTitle }}</a>
           </mat-card-title>
-          <mat-card-subtitle>{{ item.requesterEmail }} · {{ item.amount ?? '—' }}</mat-card-subtitle>
+          <mat-card-subtitle>{{ item.requesterEmail }} · {{ item.amount != null ? (item.amount | number: '1.0-2') : '—' }}</mat-card-subtitle>
         </mat-card-header>
 
         @if (item.tier > 1) {

@@ -1,52 +1,65 @@
-@if (branch.activeBranch(); as activeBranch) {
-  <span class="eyebrow">Sede: {{ activeBranch.name }}</span>
-}
-<h2>Nueva solicitud</h2>
-
-<form (ngSubmit)="submit()">
-  <mat-form-field appearance="outline">
-    <mat-label>Título</mat-label>
-    <input matInput name="title" type="text" [(ngModel)]="title" required />
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Descripción</mat-label>
-    <textarea matInput name="description" [(ngModel)]="description" rows="3"></textarea>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Monto</mat-label>
-    <input matInput name="amount" type="number" step="0.01" min="0" [(ngModel)]="amount" />
-  </mat-form-field>
-
-  <fieldset>
-    <legend>Campos adicionales</legend>
-    @for (field of fields(); track $index) {
-      <div class="field-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Clave</mat-label>
-          <input matInput type="text" [(ngModel)]="field.key" [name]="'key' + $index" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Valor</mat-label>
-          <input matInput type="text" [(ngModel)]="field.value" [name]="'value' + $index" />
-        </mat-form-field>
-        <button mat-icon-button type="button" (click)="removeField($index)" aria-label="Quitar campo">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    }
-    <button mat-button type="button" (click)="addField()">
-      <mat-icon>add</mat-icon>
-      Agregar campo
-    </button>
-  </fieldset>
-
-  @if (errorMessage(); as error) {
-    <p class="error">{{ error }}</p>
+<app-modal-shell title="Nueva solicitud" icon="note_add" [closeDisabled]="saving()" (closed)="cancel()">
+  @if (branch.activeBranch(); as activeBranch) {
+    <span class="eyebrow">Sede: {{ activeBranch.name }}</span>
   }
 
-  <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
-    {{ saving() ? 'Guardando...' : 'Crear solicitud' }}
-  </button>
-</form>
+  <form class="request-form">
+    <section class="form-section">
+      <mat-form-field appearance="outline">
+        <mat-label>Título</mat-label>
+        <input matInput name="title" type="text" [(ngModel)]="title" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput name="description" [(ngModel)]="description" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="amount-field">
+        <mat-label>Monto</mat-label>
+        <input matInput name="amount" type="number" step="0.01" min="0" [(ngModel)]="amount" />
+      </mat-form-field>
+    </section>
+
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-label">Campos adicionales</span>
+        <button mat-button type="button" (click)="addField()">
+          <mat-icon>add</mat-icon>
+          Agregar campo
+        </button>
+      </div>
+
+      @for (field of fields(); track $index) {
+        <div class="field-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Clave</mat-label>
+            <input matInput type="text" [(ngModel)]="field.key" [name]="'key' + $index" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Valor</mat-label>
+            <input matInput type="text" [(ngModel)]="field.value" [name]="'value' + $index" />
+          </mat-form-field>
+          <button mat-icon-button type="button" (click)="removeField($index)" aria-label="Quitar campo">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </section>
+
+    @if (errorMessage(); as error) {
+      <p class="error">{{ error }}</p>
+    }
+  </form>
+
+  <div modalFooter>
+    <button mat-button type="button" [disabled]="saving()" (click)="cancel()">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="submit()">
+      @if (saving()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Crear solicitud
+      }
+    </button>
+  </div>
+</app-modal-shell>

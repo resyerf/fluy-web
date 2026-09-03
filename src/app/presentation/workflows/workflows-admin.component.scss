@@ -1,14 +1,13 @@
 .intro {
   max-width: 720px;
   color: var(--ink-soft);
+  margin: 0.15rem 0 0;
 }
 .list-card,
-.form-card,
 .editor-card {
   max-width: 720px;
   margin-bottom: 1rem;
 }
-.form-card mat-form-field,
 .editor-card mat-form-field {
   margin-right: 0.5rem;
 }

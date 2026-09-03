@@ -28,11 +28,6 @@ export const routes: Routes = [
           import('./presentation/requests/requests-list.component').then((m) => m.RequestsListComponent)
       },
       {
-        path: 'requests/new',
-        loadComponent: () =>
-          import('./presentation/requests/request-create.component').then((m) => m.RequestCreateComponent)
-      },
-      {
         path: 'requests/:id',
         loadComponent: () =>
           import('./presentation/requests/request-detail.component').then((m) => m.RequestDetailComponent)

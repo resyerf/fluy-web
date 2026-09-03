@@ -2,7 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
@@ -10,6 +12,7 @@ import { IdentityRepository } from '../../application/identity/identity-reposito
 import { WorkflowRepository } from '../../application/workflow/workflow-repository.port';
 import { TenantRole } from '../../domain/identity/identity.model';
 import { WorkflowDefinitionSummary, WorkflowVersionDetail } from '../../domain/workflow/workflow.model';
+import { CreateWorkflowDialogComponent } from './create-workflow-dialog.component';
 
 const CONDITION_OPERATORS = [
   { value: 'GreaterThanOrEqual', label: '>=' },
@@ -33,6 +36,7 @@ const SIGNAL_BY_DEFINITION_STATUS: Record<string, string> = {
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule
@@ -43,6 +47,7 @@ const SIGNAL_BY_DEFINITION_STATUS: Record<string, string> = {
 export class WorkflowsAdminComponent {
   private readonly workflowRepository = inject(WorkflowRepository);
   private readonly identityRepository = inject(IdentityRepository);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly loading = signal(true);
   protected readonly definitions = signal<WorkflowDefinitionSummary[]>([]);
@@ -54,9 +59,6 @@ export class WorkflowsAdminComponent {
 
   protected readonly operators = CONDITION_OPERATORS;
   protected readonly signalByDefinitionStatus = SIGNAL_BY_DEFINITION_STATUS;
-
-  protected newName = '';
-  protected newDescription = '';
 
   protected stepName = '';
   protected stepRoleId = '';
@@ -71,17 +73,16 @@ export class WorkflowsAdminComponent {
     this.load();
   }
 
-  createDefinition(): void {
-    this.errorMessage.set(null);
-    this.workflowRepository.createDefinition(this.newName, this.newDescription).subscribe({
-      next: (result) => {
-        this.newName = '';
-        this.newDescription = '';
-        this.load();
-        this.openEditor(result.draftVersionId);
-      },
-      error: (error) => this.errorMessage.set(error?.error?.detail ?? 'No se pudo crear el workflow.')
-    });
+  openCreateDialog(): void {
+    this.dialog
+      .open(CreateWorkflowDialogComponent, { width: '480px' })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.load();
+          this.openEditor(result.draftVersionId);
+        }
+      });
   }
 
   archive(definitionId: string): void {

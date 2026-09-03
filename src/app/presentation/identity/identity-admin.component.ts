@@ -83,8 +83,19 @@ export class IdentityAdminComponent {
   }
 
   openCreateRoleDialog(): void {
+    // El catálogo de permisos crece con el producto — un cuadro centrado
+    // angosto lo aprieta. Este diálogo se posiciona como panel lateral de
+    // alto completo (misma mecánica de MatDialog/CDK Overlay que el resto,
+    // solo cambia la forma) en vez de mudarse a un patrón nuevo sin probar.
     this.dialog
-      .open(CreateRoleDialogComponent, { width: '480px', data: { permissions: this.permissions() } })
+      .open(CreateRoleDialogComponent, {
+        position: { top: '0', right: '0' },
+        width: 'min(420px, 100vw)',
+        maxWidth: 'min(420px, 100vw)',
+        height: '100dvh',
+        panelClass: 'side-panel-dialog',
+        data: { permissions: this.permissions() }
+      })
       .afterClosed()
       .subscribe((created) => {
         if (created) {

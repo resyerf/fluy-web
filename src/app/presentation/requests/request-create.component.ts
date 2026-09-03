@@ -1,24 +1,38 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RequestRepository } from '../../application/request/request-repository.port';
 import { BranchService } from '../../core/branch/branch.service';
 import { RequestField } from '../../domain/request/request.model';
+import { ModalShellComponent } from '../../shared/components/modal-shell/modal-shell.component';
+
+export interface RequestCreateDialogResult {
+  requestId: string;
+}
 
 @Component({
   selector: 'app-request-create',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    ModalShellComponent
+  ],
   templateUrl: './request-create.component.html',
   styleUrl: './request-create.component.scss'
 })
 export class RequestCreateComponent {
   private readonly repository = inject(RequestRepository);
-  private readonly router = inject(Router);
+  private readonly dialogRef = inject(MatDialogRef<RequestCreateComponent, RequestCreateDialogResult | null>);
   protected readonly branch = inject(BranchService);
 
   protected title = '';
@@ -48,13 +62,17 @@ export class RequestCreateComponent {
     this.repository.create({ title: this.title, description: this.description, amount: this.amount, fields }, branchId).subscribe({
       next: (result) => {
         this.saving.set(false);
-        this.router.navigate(['/requests', result.requestId]);
+        this.dialogRef.close({ requestId: result.requestId });
       },
       error: (error) => {
         this.saving.set(false);
         this.errorMessage.set(this.extractErrorMessage(error));
       }
     });
+  }
+
+  cancel(): void {
+    this.dialogRef.close(null);
   }
 
   private extractErrorMessage(error: unknown): string {
