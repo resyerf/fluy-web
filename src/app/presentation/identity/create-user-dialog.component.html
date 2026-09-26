@@ -1,15 +1,17 @@
-<app-modal-shell title="Nuevo usuario" icon="person_add" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell
+  title="Nuevo usuario"
+  [closeDisabled]="saving()"
+  [errorMessage]="errorMessage()"
+  (closed)="cancel()"
+>
   <mat-form-field appearance="outline">
     <mat-label>Email</mat-label>
-    <input matInput name="email" [(ngModel)]="email" />
+    <input matInput name="email" type="email" [(ngModel)]="email" />
   </mat-form-field>
   <mat-form-field appearance="outline">
     <mat-label>Nombre completo</mat-label>
     <input matInput name="fullName" [(ngModel)]="fullName" />
   </mat-form-field>
-  @if (errorMessage(); as error) {
-    <p class="error">{{ error }}</p>
-  }
 
   <div modalFooter>
     <button mat-button [disabled]="saving()" (click)="cancel()">Cancelar</button>

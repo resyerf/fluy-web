@@ -32,7 +32,7 @@ mat-form-field {
 .permission-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.1rem;
+  gap: 0.55rem;
   padding: 0.3rem 0;
   cursor: pointer;
 }
@@ -50,9 +50,4 @@ mat-form-field {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--ink-faint);
-}
-
-.error {
-  color: var(--signal-stop);
-  font-size: 0.85rem;
 }

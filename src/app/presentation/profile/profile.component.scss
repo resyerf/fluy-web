@@ -1,11 +1,18 @@
 .profile-card {
   max-width: 480px;
 }
+.profile-card + .profile-card {
+  margin-top: 1rem;
+}
 .profile-header {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.25rem;
+}
+.profile-identity {
+  flex: 1;
+  min-width: 0;
 }
 .profile-avatar {
   display: inline-flex;
@@ -23,9 +30,37 @@
 }
 .profile-name {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-family: var(--font-display);
   font-weight: 600;
   color: var(--ink);
+}
+.edit-name-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  line-height: 1.75rem;
+  color: var(--ink-faint);
+
+  ::ng-deep .mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+.name-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+.name-edit-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 .profile-email {
   margin: 0.15rem 0 0;
@@ -52,4 +87,34 @@
   flex-wrap: wrap;
   gap: 0.35rem;
   color: var(--ink);
+}
+
+.password-card {
+  h3 {
+    margin: 0 0 0.15rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hint {
+    margin: 0 0 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  mat-form-field {
+    width: 100%;
+  }
+}
+.error {
+  color: var(--signal-stop);
+  font-size: 0.85rem;
+}
+.success {
+  color: var(--accent);
+  font-size: 0.85rem;
 }

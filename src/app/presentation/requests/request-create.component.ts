@@ -54,6 +54,7 @@ export class RequestCreateComponent {
   submit(): void {
     this.errorMessage.set(null);
     this.saving.set(true);
+    this.dialogRef.disableClose = true;
 
     const fields = this.fields().filter((field) => field.key.trim().length > 0);
 
@@ -62,10 +63,12 @@ export class RequestCreateComponent {
     this.repository.create({ title: this.title, description: this.description, amount: this.amount, fields }, branchId).subscribe({
       next: (result) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.dialogRef.close({ requestId: result.requestId });
       },
       error: (error) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.errorMessage.set(this.extractErrorMessage(error));
       }
     });

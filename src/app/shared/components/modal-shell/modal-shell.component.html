@@ -21,6 +21,9 @@
 
 <div mat-dialog-content class="modal-shell-body">
   <ng-content />
+  @if (errorMessage(); as error) {
+    <p class="notice is-stop" role="alert">{{ error }}</p>
+  }
 </div>
 
 <div mat-dialog-actions align="end" class="modal-shell-footer">

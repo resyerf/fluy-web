@@ -1,4 +1,9 @@
-<app-modal-shell title="Nuevo rol" icon="admin_panel_settings" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell
+  title="Nuevo rol"
+  [closeDisabled]="saving()"
+  [errorMessage]="errorMessage()"
+  (closed)="cancel()"
+>
   <mat-form-field appearance="outline">
     <mat-label>Nombre</mat-label>
     <input matInput name="name" [(ngModel)]="name" />
@@ -21,10 +26,6 @@
       </div>
     }
   </div>
-
-  @if (errorMessage(); as error) {
-    <p class="error">{{ error }}</p>
-  }
 
   <div modalFooter>
     <button mat-button [disabled]="saving()" (click)="cancel()">Cancelar</button>

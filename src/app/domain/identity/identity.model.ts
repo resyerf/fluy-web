@@ -44,3 +44,9 @@ export interface LoginResult {
   fullName: string;
   roles: string[];
 }
+
+export interface UpdateProfileResult {
+  id: string;
+  email: string;
+  fullName: string;
+}

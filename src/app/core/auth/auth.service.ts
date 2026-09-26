@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { AuthRepository } from '../../application/identity/auth-repository.port';
-import { LoginResult } from '../../domain/identity/identity.model';
+import { LoginResult, UpdateProfileResult } from '../../domain/identity/identity.model';
 
 const USER_STORAGE_KEY = 'fluy.session';
 
@@ -23,6 +23,14 @@ export class AuthService {
     return this.authRepository.setPassword(token, newPassword).pipe(tap((result) => this.setSession(result)));
   }
 
+  updateProfile(fullName: string): Observable<UpdateProfileResult> {
+    return this.authRepository.updateProfile(fullName).pipe(tap((result) => this.mergeSession({ fullName: result.fullName })));
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.authRepository.changePassword(currentPassword, newPassword);
+  }
+
   logout(): void {
     this.sessionSignal.set(null);
 
@@ -31,6 +39,15 @@ export class AuthService {
     } catch {
       // Ignorado a propósito — el estado en memoria ya se limpió.
     }
+  }
+
+  private mergeSession(patch: Partial<LoginResult>): void {
+    const current = this.sessionSignal();
+    if (!current) {
+      return;
+    }
+
+    this.setSession({ ...current, ...patch });
   }
 
   private setSession(result: LoginResult): void {

@@ -40,14 +40,17 @@ export class CreateCompanyDialogComponent {
 
     this.saving.set(true);
     this.errorMessage.set(null);
+    this.dialogRef.disableClose = true;
 
     this.repository.createCompany(this.name.trim(), this.legalIdentifier.trim() || null).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.dialogRef.close(true);
       },
       error: (error) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.errorMessage.set(error?.error?.detail ?? 'No se pudo crear la empresa.');
       }
     });

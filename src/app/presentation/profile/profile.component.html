@@ -5,9 +5,38 @@
     <mat-card-content>
       <div class="profile-header">
         <span class="profile-avatar">{{ initials(user.fullName) }}</span>
-        <div>
-          <p class="profile-name">{{ user.fullName }}</p>
-          <p class="profile-email">{{ user.email }}</p>
+        <div class="profile-identity">
+          @if (editingName()) {
+            <form class="name-edit-form" (ngSubmit)="saveName()">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre completo</mat-label>
+                <input matInput name="fullName" [(ngModel)]="fullNameDraft" required />
+              </mat-form-field>
+
+              <div class="name-edit-actions">
+                <button mat-flat-button color="primary" type="submit" [disabled]="savingName()">
+                  @if (savingName()) {
+                    <mat-spinner diameter="18" />
+                  } @else {
+                    Guardar
+                  }
+                </button>
+                <button mat-button type="button" [disabled]="savingName()" (click)="cancelEditName()">Cancelar</button>
+              </div>
+
+              @if (nameError(); as error) {
+                <p class="error">{{ error }}</p>
+              }
+            </form>
+          } @else {
+            <p class="profile-name">
+              {{ user.fullName }}
+              <button mat-icon-button type="button" class="edit-name-button" aria-label="Editar nombre" (click)="startEditName(user.fullName)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </p>
+            <p class="profile-email">{{ user.email }}</p>
+          }
         </div>
       </div>
 
@@ -27,6 +56,45 @@
           }
         </dd>
       </dl>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="profile-card password-card">
+    <mat-card-content>
+      <h3>Cambiar contraseña</h3>
+      <p class="hint">Mínimo 8 caracteres, con mayúscula, minúscula y número.</p>
+
+      <form (ngSubmit)="changePassword()">
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña actual</mat-label>
+          <input matInput name="currentPassword" type="password" [(ngModel)]="currentPassword" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nueva contraseña</mat-label>
+          <input matInput name="newPassword" type="password" [(ngModel)]="newPassword" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmar nueva contraseña</mat-label>
+          <input matInput name="confirmPassword" type="password" [(ngModel)]="confirmPassword" required />
+        </mat-form-field>
+
+        @if (passwordError(); as error) {
+          <p class="error">{{ error }}</p>
+        }
+        @if (passwordSuccess()) {
+          <p class="success">Contraseña actualizada correctamente.</p>
+        }
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="changingPassword()">
+          @if (changingPassword()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Cambiar contraseña
+          }
+        </button>
+      </form>
     </mat-card-content>
   </mat-card>
 }

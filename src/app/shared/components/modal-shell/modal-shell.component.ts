@@ -11,7 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
  * hand-rolled in every dialog.
  *
  * Usage:
- *   <app-modal-shell title="Nuevo X" icon="domain" [closeDisabled]="saving()" (closed)="cancel()">
+ *   <app-modal-shell title="Nuevo X" icon="domain" [closeDisabled]="saving()"
+ *       [errorMessage]="errorMessage()" (closed)="cancel()">
  *     ...form fields...
  *     <div modalFooter>
  *       <button mat-button (click)="cancel()">Cancelar</button>
@@ -30,5 +31,6 @@ export class ModalShellComponent {
   title = input.required<string>();
   icon = input<string | null>(null);
   closeDisabled = input(false);
+  errorMessage = input<string | null>(null);
   closed = output<void>();
 }

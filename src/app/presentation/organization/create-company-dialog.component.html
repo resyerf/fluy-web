@@ -1,4 +1,9 @@
-<app-modal-shell title="Nueva empresa" icon="domain" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell
+  title="Nueva empresa"
+  [closeDisabled]="saving()"
+  [errorMessage]="errorMessage()"
+  (closed)="cancel()"
+>
   <mat-form-field appearance="outline">
     <mat-label>Nombre</mat-label>
     <input matInput name="name" [(ngModel)]="name" />
@@ -7,9 +12,6 @@
     <mat-label>Identificador legal (opcional)</mat-label>
     <input matInput name="legalIdentifier" [(ngModel)]="legalIdentifier" />
   </mat-form-field>
-  @if (errorMessage(); as error) {
-    <p class="error">{{ error }}</p>
-  }
 
   <div modalFooter>
     <button mat-button [disabled]="saving()" (click)="cancel()">Cancelar</button>

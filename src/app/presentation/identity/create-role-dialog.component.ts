@@ -90,14 +90,17 @@ export class CreateRoleDialogComponent {
 
     this.saving.set(true);
     this.errorMessage.set(null);
+    this.dialogRef.disableClose = true;
 
     this.repository.createRole(this.name.trim(), permissionCodes).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.dialogRef.close(true);
       },
       error: (error) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.errorMessage.set(error?.error?.detail ?? 'No se pudo crear el rol.');
       }
     });

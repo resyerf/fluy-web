@@ -45,14 +45,17 @@ export class CreateWorkflowDialogComponent {
 
     this.saving.set(true);
     this.errorMessage.set(null);
+    this.dialogRef.disableClose = true;
 
     this.repository.createDefinition(this.name.trim(), this.description.trim()).subscribe({
       next: (result) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.dialogRef.close(result);
       },
       error: (error) => {
         this.saving.set(false);
+        this.dialogRef.disableClose = false;
         this.errorMessage.set(error?.error?.detail ?? 'No se pudo crear el workflow.');
       }
     });

@@ -181,6 +181,9 @@ a:visited {
 .notice.is-amber::before {
   background: var(--signal-amber);
 }
+.notice.is-stop::before {
+  background: var(--signal-stop);
+}
 
 /* ---- eyebrow / manifest label: contextual metadata inline with content
    (which company a new branch belongs to, whose comment this is) — never a
@@ -465,6 +468,17 @@ a:visited {
   box-shadow:
     0 24px 48px -16px color-mix(in srgb, var(--ink) 30%, transparent),
     0 4px 14px color-mix(in srgb, var(--ink) 14%, transparent) !important;
+}
+
+/* Material ships .mat-mdc-dialog-surface with overflow-y:auto and no
+   overflow-x set. Per the CSS overflow spec, when one axis is 'auto' and
+   the other is left at its default 'visible', the 'visible' axis computes
+   to 'auto' too — so the surface silently gets a horizontal scrollbar the
+   moment its content is a sub-pixel wider than the box (scrollbar gutters,
+   box-model rounding), even though nothing in this app ever asked for
+   horizontal scroll anywhere. */
+.mat-mdc-dialog-surface {
+  overflow-x: hidden !important;
 }
 
 .mat-expansion-panel {

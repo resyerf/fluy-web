@@ -48,6 +48,8 @@
   flex-direction: column;
   gap: 0.9rem;
   padding-top: 0.9rem;
+  overflow: visible;
+  max-height: none;
 }
 .modal-shell-footer:empty {
   display: none;

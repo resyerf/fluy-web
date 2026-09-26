@@ -13,11 +13,7 @@
 } @else if (requests().length === 0) {
   <div class="empty-state">
     <mat-icon>inbox</mat-icon>
-    <p>Todavía no creaste ninguna solicitud. Empezá una para que entre a su vía de aprobación.</p>
-    <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      Nueva solicitud
-    </button>
+    <p>Todavía no creaste ninguna solicitud. Usá "Nueva solicitud" arriba para empezar una.</p>
   </div>
 } @else {
   <div class="table-scroll">

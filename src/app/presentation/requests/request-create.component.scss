@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
-  max-width: 480px;
 }
 
 .form-section {
@@ -44,8 +43,4 @@ mat-form-field {
 }
 .field-row mat-form-field {
   flex: 1 1 140px;
-}
-
-.error {
-  color: var(--signal-stop);
 }

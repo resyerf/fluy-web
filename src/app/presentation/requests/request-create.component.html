@@ -1,4 +1,9 @@
-<app-modal-shell title="Nueva solicitud" icon="note_add" [closeDisabled]="saving()" (closed)="cancel()">
+<app-modal-shell
+  title="Nueva solicitud"
+  [closeDisabled]="saving()"
+  [errorMessage]="errorMessage()"
+  (closed)="cancel()"
+>
   @if (branch.activeBranch(); as activeBranch) {
     <span class="eyebrow">Sede: {{ activeBranch.name }}</span>
   }
@@ -46,10 +51,6 @@
         </div>
       }
     </section>
-
-    @if (errorMessage(); as error) {
-      <p class="error">{{ error }}</p>
-    }
   </form>
 
   <div modalFooter>
